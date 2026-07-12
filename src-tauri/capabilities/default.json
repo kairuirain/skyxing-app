@@ -1,0 +1,10 @@
+{
+  "identifier": "default",
+  "description": "Default capabilities for SkyXing",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "http:default",
+    "shell:allow-open"
+  ]
+}
