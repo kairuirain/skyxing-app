@@ -4,7 +4,12 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
-    "http:default",
+    {
+      "identifier": "http:default",
+      "allow": [
+        { "url": "https://skyxing.dpdns.org/**" }
+      ]
+    },
     "shell:allow-open"
   ]
 }

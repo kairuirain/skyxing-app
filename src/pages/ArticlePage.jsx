@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
 import { Calendar, Eye, Tag, User, Send, Trash2, Edit3 } from 'lucide-react';
+import { sanitizeHTML } from '../lib/sanitize.js';
 
 export default function ArticlePage() {
   const { id } = useParams();
@@ -60,7 +61,7 @@ export default function ArticlePage() {
       </div>
       {isOwner && <div className="flex gap-2 mb-4"><Link to={`/edit/${article.id}`} className="btn-outline btn-sm"><Edit3 size={13} className="mr-1"/>编辑</Link><button onClick={handleDeleteArticle} className="btn-danger btn-sm"><Trash2 size={13} className="mr-1"/>删除</button></div>}
       {article.coverImage && <img src={article.coverImage} alt="" className="w-full rounded-lg mb-5 max-h-80 object-cover"/>}
-      <div className="article-content mb-8" dangerouslySetInnerHTML={{__html:article.content}}/>
+      <div className="article-content mb-8" dangerouslySetInnerHTML={{__html:sanitizeHTML(article.content)}}/>
 
       {article.author && <div className="card p-4 mb-6 flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold">{article.author.displayName?.[0]}</div><div><Link to={`/user/${article.author.id}`} className="font-semibold text-sm hover:text-primary-600">{article.author.displayName}</Link>{article.author.bio&&<p className="text-xs text-gray-500">{article.author.bio}</p>}</div></div>}
 
