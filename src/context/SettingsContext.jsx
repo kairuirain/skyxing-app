@@ -5,7 +5,7 @@ const SettingsContext = createContext(null);
 const STORAGE_KEY = 'skyxing_settings';
 
 export function SettingsProvider({ children }) {
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState('dark');
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [debugMode, setDebugMode] = useState(false);
   const [logs, setLogs] = useState([]);
@@ -26,9 +26,15 @@ export function SettingsProvider({ children }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ theme, terminalOpen, debugMode }));
   }, [theme, terminalOpen, debugMode]);
 
-  // 应用主题到根节点
+  // 应用主题到根节点，并同步 Tauri 原生窗口标题栏配色（仅 Tauri 环境）
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+    const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+    if (isTauri) {
+      import('@tauri-apps/api/window')
+        .then(({ getCurrentWindow }) => getCurrentWindow().setTheme(theme === 'dark' ? 'Dark' : 'Light'))
+        .catch(() => {});
+    }
   }, [theme]);
 
   // 捕获 console 输出，供“终端界面显示”面板使用

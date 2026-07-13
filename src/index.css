@@ -18,7 +18,38 @@
   --win-text-tertiary: #8a8a8a;
   --win-card: #ffffff;
   --win-card-hover: #fafafa;
+  /* 强调色按钮上的文字颜色（明/暗不同） */
+  --win-on-accent: #ffffff;
+
+  /* Tailwind primary 调色板（随主题切换）— 浅色：蓝色系 */
+  --c-primary-50: #eff6ff;
+  --c-primary-100: #dbeafe;
+  --c-primary-200: #bfdbfe;
+  --c-primary-300: #93c5fd;
+  --c-primary-400: #60a5fa;
+  --c-primary-500: #3b82f6;
+  --c-primary-600: #2563eb;
+  --c-primary-700: #1d4ed8;
+  --c-primary-800: #1e40af;
+  --c-primary-900: #1e3a8a;
+  --c-primary-950: #172554;
+
+  /* Tailwind gray 调色板（随主题切换）— 浅色：标准灰阶 */
+  --c-gray-50: #f9fafb;
+  --c-gray-100: #f3f4f6;
+  --c-gray-200: #e5e7eb;
+  --c-gray-300: #d1d5db;
+  --c-gray-400: #9ca3af;
+  --c-gray-500: #6b7280;
+  --c-gray-600: #4b5563;
+  --c-gray-700: #374151;
+  --c-gray-800: #1f2937;
+  --c-gray-900: #111827;
 }
+
+/* 防止首屏白屏闪烁：在 JS 加载前由 index.html 内联脚本设置 data-theme，
+   这里确保 html/body 背景始终跟随主题变量。 */
+html { background-color: var(--win-bg); }
 
 /* Segoe UI Variable — the Windows system UI typeface */
 .font-win {
@@ -40,6 +71,30 @@
 .win-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.32); background-clip: content-box; }
 .win-scroll::-webkit-scrollbar-track { background: transparent; }
 
+/* ===== Android / Material (底部导航) 适配 ===== */
+/* 适配刘海屏与手势导航栏：顶部状态栏与底部导航留出安全区 */
+.android-app { height: 100dvh; }
+.android-app main { padding-top: env(safe-area-inset-top); }
+
+.android-bottom-nav {
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+/* 去除移动端点击高亮，使用原生 ripple 风格按压态 */
+.android-bottom-nav a { -webkit-tap-highlight-color: transparent; }
+
+/* 终端日志以底部抽屉浮层呈现，避免遮挡底部导航逻辑 */
+.android-terminal-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.28);
+}
+
 /* ===== Dark theme (set via data-theme="dark" on <html>) ===== */
 [data-theme="dark"] {
   --win-bg: #202020;
@@ -48,14 +103,40 @@
   --win-pane-pressed: rgba(255, 255, 255, 0.12);
   --win-border: rgba(255, 255, 255, 0.08);
   --win-border-strong: rgba(255, 255, 255, 0.14);
-  --win-accent: #62b3f3;
-  --win-accent-hover: #8fcbf7;
-  --win-accent-soft: rgba(98, 179, 243, 0.18);
+  --win-accent: #4aa3f0;
+  --win-accent-hover: #6cb6f3;
+  --win-accent-soft: rgba(74, 163, 240, 0.18);
   --win-text: #f3f3f3;
   --win-text-secondary: #c8c8c8;
   --win-text-tertiary: #9a9a9a;
   --win-card: #2b2b2b;
   --win-card-hover: #333333;
+  --win-on-accent: #04121f;
+
+  /* primary 调色板 — 暗色：明亮蓝，保证深色背景上可读 */
+  --c-primary-50: #0c2740;
+  --c-primary-100: #123650;
+  --c-primary-200: #1a486b;
+  --c-primary-300: #255d86;
+  --c-primary-400: #357aa6;
+  --c-primary-500: #4f97c4;
+  --c-primary-600: #4aa3f0;
+  --c-primary-700: #7cc0f5;
+  --c-primary-800: #a9d8fa;
+  --c-primary-900: #d6eefd;
+  --c-primary-950: #eaf8ff;
+
+  /* gray 调色板 — 暗色：反转，使 bg-* 为深表面、text-* 为浅文字 */
+  --c-gray-50: #1a1a1a;
+  --c-gray-100: #222222;
+  --c-gray-200: #2c2c2c;
+  --c-gray-300: #3a3a3a;
+  --c-gray-400: #6b6b6b;
+  --c-gray-500: #8a8a8a;
+  --c-gray-600: #a8a8a8;
+  --c-gray-700: #c4c4c4;
+  --c-gray-800: #dedede;
+  --c-gray-900: #f3f3f3;
 }
 
 @layer base {
@@ -84,14 +165,21 @@
   .article-content blockquote {
     @apply border-l-4 border-primary-500 pl-4 my-4 italic text-gray-600;
   }
+  /* 代码块使用固定深色配色，明暗主题下均保持可读 */
   .article-content code {
-    @apply bg-gray-100 rounded px-1.5 py-0.5 text-sm font-mono text-pink-600;
+    background: #2a2a2a;
+    color: #f0883e;
+    @apply rounded px-1.5 py-0.5 text-sm font-mono;
   }
   .article-content pre {
-    @apply bg-gray-900 text-gray-100 rounded-lg p-4 my-4 overflow-x-auto;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    @apply rounded-lg p-4 my-4 overflow-x-auto;
   }
   .article-content pre code {
-    @apply bg-transparent text-gray-100 p-0;
+    background: transparent;
+    color: #d4d4d4;
+    @apply p-0;
   }
   .article-content img {
     @apply max-w-full rounded-lg my-4;
@@ -109,20 +197,30 @@
   }
 
   .btn-primary {
-    @apply btn bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+    background: var(--win-accent);
+    color: var(--win-on-accent);
   }
+  .btn-primary:hover { background: var(--win-accent-hover); }
+  .btn-primary:focus-visible { box-shadow: 0 0 0 2px var(--win-accent); }
 
   .btn-secondary {
-    @apply btn bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-400;
+    background: var(--win-pane);
+    color: var(--win-text);
   }
+  .btn-secondary:hover { background: var(--win-pane-hover); }
 
   .btn-outline {
-    @apply btn border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-primary-500;
+    border: 1px solid var(--win-border-strong);
+    color: var(--win-text);
+    background: transparent;
   }
+  .btn-outline:hover { background: var(--win-pane-hover); }
 
   .btn-danger {
-    @apply btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+    background: #dc2626;
+    color: #ffffff;
   }
+  .btn-danger:hover { background: #b91c1c; }
 
   .btn-sm {
     @apply px-3 py-1.5 text-sm;
@@ -133,12 +231,26 @@
   }
 
   .input {
-    @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg
-           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
-           transition-colors duration-200 placeholder-gray-400;
+    width: 100%;
+    padding: 0.625rem 1rem;
+    background: var(--win-bg);
+    color: var(--win-text);
+    border: 1px solid var(--win-border);
+    border-radius: 0.5rem;
+    transition: box-shadow 0.2s, border-color 0.2s;
   }
+  .input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--win-accent);
+    border-color: transparent;
+  }
+  .input::placeholder { color: var(--win-text-tertiary); }
 
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden;
+    background: var(--win-card);
+    border: 1px solid var(--win-border);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
 }

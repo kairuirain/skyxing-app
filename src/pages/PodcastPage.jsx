@@ -45,7 +45,7 @@ export default function PodcastPage() {
           <button
             onClick={() => { setSelectedTag(''); setPage(1); }}
             className={'h-7 px-3 rounded-full text-[12.5px] font-medium transition-colors ' +
-              (!selectedTag ? 'bg-[var(--win-accent)] text-white' : 'bg-[var(--win-pane)] text-[var(--win-text-secondary)] hover:bg-[var(--win-pane-hover)]')}
+              (!selectedTag ? 'bg-[var(--win-accent)] text-[var(--win-on-accent)]' : 'bg-[var(--win-pane)] text-[var(--win-text-secondary)] hover:bg-[var(--win-pane-hover)]')}
           >
             全部
           </button>
@@ -54,7 +54,7 @@ export default function PodcastPage() {
               key={tag}
               onClick={() => { setSelectedTag(tag); setPage(1); }}
               className={'h-7 px-3 rounded-full text-[12.5px] font-medium transition-colors ' +
-                (selectedTag === tag ? 'bg-[var(--win-accent)] text-white' : 'bg-[var(--win-pane)] text-[var(--win-text-secondary)] hover:bg-[var(--win-pane-hover)]')}
+                (selectedTag === tag ? 'bg-[var(--win-accent)] text-[var(--win-on-accent)]' : 'bg-[var(--win-pane)] text-[var(--win-text-secondary)] hover:bg-[var(--win-pane-hover)]')}
             >
               {tag}
             </button>

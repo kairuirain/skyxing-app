@@ -25,7 +25,7 @@ export default function RegisterPage() {
     <div className="max-w-sm mx-auto mt-8">
       <div className="card p-6">
         <h1 className="text-xl font-bold text-center mb-5">注册 SkyXing</h1>
-        {error && <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg mb-3 text-sm">{error}</div>}
+        {error && <div className="bg-[rgba(239,68,68,0.12)] border border-[rgba(239,68,68,0.4)] text-[#f87171] px-3 py-2 rounded-lg mb-3 text-sm">{error}</div>}
         <form onSubmit={handleSubmit} className="space-y-3">
           <input type="text" name="username" value={form.username} onChange={handleChange} className="input" placeholder="用户名 (3-30字符)" required minLength={3} />
           <input type="email" name="email" value={form.email} onChange={handleChange} className="input" placeholder="邮箱" required />

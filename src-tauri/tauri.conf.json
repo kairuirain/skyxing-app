@@ -14,6 +14,7 @@
       {
         "label": "main",
         "title": "SkyXing",
+        "theme": "Dark",
         "width": 1200,
         "height": 800,
         "minWidth": 800,

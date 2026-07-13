@@ -22,7 +22,7 @@ export default function LoginPage() {
     <div className="max-w-sm mx-auto mt-12">
       <div className="card p-6">
         <h1 className="text-xl font-bold text-center mb-5">登录 SkyXing</h1>
-        {error && <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg mb-3 text-sm">{error}</div>}
+        {error && <div className="bg-[rgba(239,68,68,0.12)] border border-[rgba(239,68,68,0.4)] text-[#f87171] px-3 py-2 rounded-lg mb-3 text-sm">{error}</div>}
         <form onSubmit={handleSubmit} className="space-y-3">
           <input type="text" value={username} onChange={e=>setUsername(e.target.value)} className="input" placeholder="用户名" required />
           <input type="password" value={password} onChange={e=>setPassword(e.target.value)} className="input" placeholder="密码" required />

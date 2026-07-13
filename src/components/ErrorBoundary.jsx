@@ -18,8 +18,8 @@ export default class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-8">
-          <div className="max-w-lg w-full bg-white rounded-xl shadow-lg p-8">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--win-bg)] p-8">
+          <div className="max-w-lg w-full bg-[var(--win-card)] rounded-xl shadow-lg p-8">
             <h1 className="text-2xl font-bold text-red-600 mb-4">
               SkyXing - Application Error
             </h1>

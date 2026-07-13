@@ -40,7 +40,7 @@ export default function EditPage() {
   return (
     <div className="max-w-3xl mx-auto">
       <h1 className="text-xl font-bold mb-4">编辑文章</h1>
-      {error && <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg mb-3 text-sm">{error}</div>}
+      {error && <div className="bg-[rgba(239,68,68,0.12)] border border-[rgba(239,68,68,0.4)] text-[#f87171] px-3 py-2 rounded-lg mb-3 text-sm">{error}</div>}
       <form onSubmit={handleSubmit} className="space-y-3">
         <input type="text" value={title} onChange={e=>setTitle(e.target.value)} className="input font-semibold" placeholder="标题" required />
         <input type="text" value={coverImage} onChange={e=>setCoverImage(e.target.value)} className="input" placeholder="封面图片URL" />

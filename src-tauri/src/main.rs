@@ -1,6 +1,5 @@
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
-// 但为了调试，我们暂时在 release 也保留控制台输出
-// #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+// 在 release 构建中隐藏控制台（命令行）窗口，以 GUI 模式运行
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
     // 设置 panic hook，确保崩溃信息能被捕获

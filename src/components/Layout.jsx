@@ -1,14 +1,17 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Home, Podcast, User, LogOut, PenSquare, Terminal, Palette, Bug } from 'lucide-react';
+import { isAndroid } from '../lib/platform';
 
 const NAV_ITEMS = [
   { to: '/', label: '主页', icon: Home, end: true },
   { to: '/podcast', label: '播客', icon: Podcast },
   { to: '/mine', label: '我的', icon: User },
 ];
+
+/* ===================== 桌面 / Web 端（WinUI 侧边栏） ===================== */
 
 function NavItem({ item }) {
   const Icon = item.icon;
@@ -111,7 +114,7 @@ function TerminalPanel({ logs, onClose, onClear }) {
   );
 }
 
-export default function Layout() {
+function DesktopLayout() {
   const { user, logout } = useAuth();
   const { theme, terminalOpen, debugMode, logs, toggleTheme, toggleTerminal, toggleDebug, clearLogs } = useSettings();
   const navigate = useNavigate();
@@ -129,7 +132,7 @@ export default function Layout() {
       <nav className="w-[260px] shrink-0 bg-[var(--win-pane)] border-r border-[var(--win-border)] flex flex-col select-none">
         {/* Pane header / brand */}
         <div className="h-12 flex items-center gap-2.5 px-4">
-          <div className="w-7 h-7 rounded-md bg-[var(--win-accent)] flex items-center justify-center text-white text-[13px] font-bold shadow-sm">
+          <div className="w-7 h-7 rounded-md bg-[var(--win-accent)] flex items-center justify-center text-[var(--win-on-accent)] text-[13px] font-bold shadow-sm">
             S
           </div>
           <span className="text-[15px] font-semibold tracking-tight text-[var(--win-text)]">SkyXing</span>
@@ -173,7 +176,7 @@ export default function Layout() {
           <div className="px-2 pt-2 pb-3 border-t border-[var(--win-border)]">
             {user ? (
               <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-[var(--win-pane-hover)] transition-colors">
-                <div className="w-8 h-8 rounded-full bg-[var(--win-accent)] text-white flex items-center justify-center text-xs font-semibold shrink-0">
+                <div className="w-8 h-8 rounded-full bg-[var(--win-accent)] text-[var(--win-on-accent)] flex items-center justify-center text-xs font-semibold shrink-0">
                   {initial}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -197,7 +200,7 @@ export default function Layout() {
                 to="/login"
                 className="flex items-center gap-2.5 px-2 py-1.5 rounded-md text-[var(--win-text-secondary)] hover:bg-[var(--win-pane-hover)] transition-colors"
               >
-                <div className="w-8 h-8 rounded-full bg-[var(--win-text-tertiary)] text-white flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-[var(--win-accent)] text-[var(--win-on-accent)] flex items-center justify-center">
                   <User size={16} />
                 </div>
                 <span className="text-[13px] font-medium">登录 / 注册</span>
@@ -218,4 +221,72 @@ export default function Layout() {
       </main>
     </div>
   );
+}
+
+/* ===================== Android 端（Material 底部导航栏） ===================== */
+
+function AndroidBottomNav() {
+  return (
+    <nav className="android-bottom-nav shrink-0 flex bg-[var(--win-bg)] border-t border-[var(--win-border)] shadow-[0_-1px_3px_rgba(0,0,0,0.06)] select-none">
+      {NAV_ITEMS.map((item) => {
+        const Icon = item.icon;
+        return (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className={({ isActive }) =>
+              'relative flex-1 flex items-center justify-center h-14 active:bg-[var(--win-pane-pressed)] transition-colors duration-100 outline-none ' +
+              (isActive ? 'text-[var(--win-accent)]' : 'text-[var(--win-text-tertiary)]')
+            }
+          >
+            {({ isActive }) => (
+              <span className="flex flex-col items-center justify-center gap-1">
+                {/* Material 3 选中指示胶囊 */}
+                <span
+                  className={
+                    'flex items-center justify-center w-[56px] h-8 rounded-full transition-colors duration-150 ' +
+                    (isActive ? 'bg-[var(--win-accent-soft)]' : '')
+                  }
+                >
+                  <Icon size={24} strokeWidth={isActive ? 2.2 : 1.8} className="transition-all duration-150" />
+                </span>
+                <span className="text-[11px] font-medium leading-none">{item.label}</span>
+              </span>
+            )}
+          </NavLink>
+        );
+      })}
+    </nav>
+  );
+}
+
+function AndroidLayout() {
+  const { terminalOpen, logs, toggleTerminal, clearLogs } = useSettings();
+
+  return (
+    <div className="android-app flex flex-col h-[100dvh] w-full overflow-hidden bg-[var(--win-bg)] text-[var(--win-text)] font-win">
+      {/* 主内容区域（可滚动，内部页面自带顶部应用栏） */}
+      <main className="flex-1 min-h-0 overflow-y-auto win-scroll">
+        <Outlet />
+      </main>
+
+      {/* 终端日志面板：以底部抽屉形式覆盖，调试时临时显示 */}
+      {terminalOpen && (
+        <div className="android-terminal-sheet">
+          <TerminalPanel logs={logs} onClose={toggleTerminal} onClear={clearLogs} />
+        </div>
+      )}
+
+      {/* 底部导航栏（Material Bottom Navigation） */}
+      <AndroidBottomNav />
+    </div>
+  );
+}
+
+/* ===================== 入口：按平台选择布局 ===================== */
+
+export default function Layout() {
+  const android = useMemo(() => isAndroid(), []);
+  return android ? <AndroidLayout /> : <DesktopLayout />;
 }
