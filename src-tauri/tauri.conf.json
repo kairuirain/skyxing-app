@@ -10,6 +10,7 @@
     "frontendDist": "../dist"
   },
   "app": {
+    "title": "SkyXing",
     "windows": [
       {
         "title": "SkyXing",
@@ -25,8 +26,9 @@
       "csp": null
     }
   },
-  "bundle": {
-    "active": true,
-    "targets": ["nsis"]
+  "plugins": {
+    "http": {
+      "scope": ["https://skyxing.dpdns.org/**"]
+    }
   }
 }
