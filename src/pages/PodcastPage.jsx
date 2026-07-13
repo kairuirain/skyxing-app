@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../lib/api';
-import { Calendar, Eye, Tag, User, Search as SearchIcon } from 'lucide-react';
+import { Calendar, Eye, Tag, User } from 'lucide-react';
 
-export default function HomePage() {
+// “播客”即文章栏目：连接后端 /articles 展示文章列表
+export default function PodcastPage() {
   const [articles, setArticles] = useState([]);
   const [pagination, setPagination] = useState(null);
   const [tags, setTags] = useState([]);
   const [selectedTag, setSelectedTag] = useState('');
-  const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
@@ -19,7 +19,6 @@ export default function HomePage() {
     try {
       const params = { page, limit: 10 };
       if (selectedTag) params.tag = selectedTag;
-      if (search) params.search = search;
       const data = await api.getArticles(params);
       setArticles(data.articles || []);
       setPagination(data.pagination);
@@ -31,26 +30,13 @@ export default function HomePage() {
     try { const data = await api.getTags(); setTags(data.tags || []); } catch (e) {}
   };
 
-  const handleSearch = (e) => { e.preventDefault(); setPage(1); loadArticles(); };
   const formatDate = (d) => new Date(d).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
 
   return (
     <div className="min-h-full">
-      {/* Command bar / page header */}
-      <header className="sticky top-0 z-10 bg-[var(--win-bg)] backdrop-blur px-6 py-3 border-b border-[var(--win-border)] flex items-center gap-4">
-        <h1 className="text-xl font-semibold text-[var(--win-text)] tracking-tight">主页</h1>
-        <form onSubmit={handleSearch} className="ml-auto">
-          <div className="flex items-center h-9 px-3 rounded-md bg-[var(--win-pane)] border border-[var(--win-border)] focus-within:border-[var(--win-accent)] focus-within:ring-2 focus-within:ring-[var(--win-accent-soft)] transition">
-            <SearchIcon size={16} className="text-[var(--win-text-tertiary)] mr-2 shrink-0" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="bg-transparent outline-none text-[13.5px] w-40 sm:w-56 placeholder:text-[var(--win-text-tertiary)]"
-              placeholder="搜索文章..."
-            />
-          </div>
-        </form>
+      <header className="sticky top-0 z-10 bg-[var(--win-bg)] backdrop-blur px-6 py-3 border-b border-[var(--win-border)]">
+        <h1 className="text-xl font-semibold text-[var(--win-text)] tracking-tight">播客</h1>
+        <p className="text-[12.5px] text-[var(--win-text-tertiary)] mt-0.5">文章与播客内容</p>
       </header>
 
       <div className="px-6 py-4 max-w-[1100px]">
@@ -86,7 +72,7 @@ export default function HomePage() {
           </div>
         ) : articles.length === 0 ? (
           <div className="text-center py-16 text-[var(--win-text-tertiary)]">
-            <p className="text-[14px]">还没有文章</p>
+            <p className="text-[14px]">暂无内容</p>
           </div>
         ) : (
           <>

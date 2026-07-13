@@ -21,3 +21,6 @@ Thumbs.db
 # Environment
 .env
 .env.local
+
+# Signing key (secret, keep local only)
+skyxing.keystore

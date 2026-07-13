@@ -1,4 +1,11 @@
+import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
+
 const API_BASE = 'https://skyxing.dpdns.org/server/api';
+
+// 检测运行环境：在 Tauri 中使用 plugin-http（可绕过 CORS、支持超时），
+// 在浏览器预览（npm run dev）中回退到原生 fetch，确保都能连接后端。
+const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+const doFetch = isTauri ? tauriFetch : window.fetch;
 
 class ApiClient {
   constructor() {
@@ -25,18 +32,32 @@ class ApiClient {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
 
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
+    console.log('[API]', options.method || 'GET', url);
 
-    const data = await response.json();
+    try {
+      const requestOptions = { ...options, headers };
+      if (isTauri) requestOptions.connectTimeout = 10000;
 
-    if (!response.ok) {
-      throw new Error(data.error || 'Request failed');
+      const response = await doFetch(url, requestOptions);
+
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        console.error('[API] Non-JSON response:', text.slice(0, 200));
+        throw new Error(`Server returned non-JSON response (status ${response.status})`);
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || `Request failed with status ${response.status}`);
+      }
+
+      return data;
+    } catch (err) {
+      console.error('[API] Request failed:', url, err.message);
+      throw err;
     }
-
-    return data;
   }
 
   // Auth

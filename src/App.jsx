@@ -8,6 +8,8 @@ import WritePage from './pages/WritePage';
 import EditPage from './pages/EditPage';
 import UserPage from './pages/UserPage';
 import AdminPage from './pages/AdminPage';
+import PodcastPage from './pages/PodcastPage';
+import MinePage from './pages/MinePage';
 import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
@@ -15,6 +17,8 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
+        <Route path="/podcast" element={<PodcastPage />} />
+        <Route path="/mine" element={<MinePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/article/:id" element={<ArticlePage />} />

@@ -2,6 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== Windows 11 / Fluent (WinUI) design tokens ===== */
+:root {
+  --win-bg: #ffffff;
+  --win-pane: #f6f6f6;
+  --win-pane-hover: rgba(0, 0, 0, 0.0435);
+  --win-pane-pressed: rgba(0, 0, 0, 0.082);
+  --win-border: rgba(0, 0, 0, 0.08);
+  --win-border-strong: rgba(0, 0, 0, 0.13);
+  --win-accent: #0f6cbd;
+  --win-accent-hover: #115ea3;
+  --win-accent-soft: rgba(15, 108, 189, 0.10);
+  --win-text: #1b1b1b;
+  --win-text-secondary: #424242;
+  --win-text-tertiary: #8a8a8a;
+  --win-card: #ffffff;
+  --win-card-hover: #fafafa;
+}
+
+/* Segoe UI Variable — the Windows system UI typeface */
+.font-win {
+  font-family: 'Segoe UI Variable Display', 'Segoe UI', 'Segoe UI Variable',
+    'Microsoft YaHei', 'PingFang SC', sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Thin, desktop-style scrollbars */
+.win-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+.win-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 8px;
+}
+.win-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.32); background-clip: content-box; }
+.win-scroll::-webkit-scrollbar-track { background: transparent; }
+
+/* ===== Dark theme (set via data-theme="dark" on <html>) ===== */
+[data-theme="dark"] {
+  --win-bg: #202020;
+  --win-pane: #1b1b1b;
+  --win-pane-hover: rgba(255, 255, 255, 0.06);
+  --win-pane-pressed: rgba(255, 255, 255, 0.12);
+  --win-border: rgba(255, 255, 255, 0.08);
+  --win-border-strong: rgba(255, 255, 255, 0.14);
+  --win-accent: #62b3f3;
+  --win-accent-hover: #8fcbf7;
+  --win-accent-soft: rgba(98, 179, 243, 0.18);
+  --win-text: #f3f3f3;
+  --win-text-secondary: #c8c8c8;
+  --win-text-tertiary: #9a9a9a;
+  --win-card: #2b2b2b;
+  --win-card-hover: #333333;
+}
+
 @layer base {
   * {
     margin: 0;

@@ -5,6 +5,20 @@
   "permissions": [
     "core:default",
     "http:default",
-    "shell:allow-open"
+    {
+      "identifier": "http:allow-fetch",
+      "allow": [
+        { "url": "https://skyxing.dpdns.org/**" }
+      ]
+    },
+    "shell:allow-open",
+    "core:window:default",
+    "core:window:allow-show",
+    "core:window:allow-hide",
+    "core:window:allow-close",
+    "core:window:allow-set-focus",
+    "core:window:allow-set-title",
+    "core:window:allow-is-visible",
+    "core:webview:default"
   ]
 }

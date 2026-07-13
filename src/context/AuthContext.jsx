@@ -10,15 +10,24 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const token = localStorage.getItem('skyxing_token');
     if (token) {
+      console.log('[Auth] Token found, verifying...');
       api.setToken(token);
       api.getMe()
-        .then(data => setUser(data.user))
-        .catch(() => {
+        .then(data => {
+          console.log('[Auth] User verified:', data.user?.displayName);
+          setUser(data.user);
+        })
+        .catch((err) => {
+          console.warn('[Auth] Token verification failed:', err.message);
           api.setToken(null);
           setUser(null);
         })
-        .finally(() => setLoading(false));
+        .finally(() => {
+          console.log('[Auth] Auth check completed');
+          setLoading(false);
+        });
     } else {
+      console.log('[Auth] No token, user is guest');
       setLoading(false);
     }
   }, []);
