@@ -6,6 +6,7 @@ dist/
 
 # Tauri
 src-tauri/target/
+build_*.log
 
 # Releases (not committed)
 releases/
