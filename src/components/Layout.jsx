@@ -1,19 +1,21 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
-import { useEffect, useMemo, useRef } from 'react';
-import { Home, Podcast, User, LogOut, PenSquare, Terminal, Palette, Bug } from 'lucide-react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { Home, Podcast, User, LogOut, PenSquare, Terminal, Palette, Bug, MessageSquare } from 'lucide-react';
 import { isAndroid } from '../lib/platform';
+import api from '../lib/api';
 
 const NAV_ITEMS = [
   { to: '/', label: '主页', icon: Home, end: true },
   { to: '/podcast', label: '播客', icon: Podcast },
   { to: '/mine', label: '我的', icon: User },
+  { to: '/messages', label: '私信', icon: MessageSquare, badgeKey: 'messages' },
 ];
 
 /* ===================== 桌面 / Web 端（WinUI 侧边栏） ===================== */
 
-function NavItem({ item }) {
+function NavItem({ item, badge = 0 }) {
   const Icon = item.icon;
   return (
     <NavLink
@@ -33,16 +35,23 @@ function NavItem({ item }) {
               (isActive ? 'opacity-100' : 'opacity-0')
             }
           />
-          <Icon
-            size={20}
-            strokeWidth={1.6}
-            className={
-              'shrink-0 transition-colors duration-100 ' +
-              (isActive
-                ? 'text-[var(--win-accent)]'
-                : 'text-[var(--win-text-secondary)] group-hover:text-[var(--win-text)]')
-            }
-          />
+          <span className="relative">
+            <Icon
+              size={20}
+              strokeWidth={1.6}
+              className={
+                'shrink-0 transition-colors duration-100 ' +
+                (isActive
+                  ? 'text-[var(--win-accent)]'
+                  : 'text-[var(--win-text-secondary)] group-hover:text-[var(--win-text)]')
+              }
+            />
+            {badge > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                {badge > 99 ? '99+' : badge}
+              </span>
+            )}
+          </span>
           <span
             className={
               'truncate transition-colors duration-100 ' +
@@ -114,7 +123,7 @@ function TerminalPanel({ logs, onClose, onClear }) {
   );
 }
 
-function DesktopLayout() {
+function DesktopLayout({ unread = 0 }) {
   const { user, logout } = useAuth();
   const { theme, terminalOpen, debugMode, logs, toggleTheme, toggleTerminal, toggleDebug, clearLogs } = useSettings();
   const navigate = useNavigate();
@@ -141,7 +150,7 @@ function DesktopLayout() {
         {/* Primary navigation */}
         <div className="px-2 pt-2 pb-1 space-y-0.5">
           {NAV_ITEMS.map((item) => (
-            <NavItem key={item.to} item={item} />
+            <NavItem key={item.to} item={item} badge={item.badgeKey === 'messages' ? unread : 0} />
           ))}
         </div>
 
@@ -225,11 +234,12 @@ function DesktopLayout() {
 
 /* ===================== Android 端（Material 底部导航栏） ===================== */
 
-function AndroidBottomNav() {
+function AndroidBottomNav({ unread = 0 }) {
   return (
     <nav className="android-bottom-nav shrink-0 flex bg-[var(--win-bg)] border-t border-[var(--win-border)] shadow-[0_-1px_3px_rgba(0,0,0,0.06)] select-none">
       {NAV_ITEMS.map((item) => {
         const Icon = item.icon;
+        const badge = item.badgeKey === 'messages' ? unread : 0;
         return (
           <NavLink
             key={item.to}
@@ -245,11 +255,16 @@ function AndroidBottomNav() {
                 {/* Material 3 选中指示胶囊 */}
                 <span
                   className={
-                    'flex items-center justify-center w-[56px] h-8 rounded-full transition-colors duration-150 ' +
+                    'relative flex items-center justify-center w-[56px] h-8 rounded-full transition-colors duration-150 ' +
                     (isActive ? 'bg-[var(--win-accent-soft)]' : '')
                   }
                 >
                   <Icon size={24} strokeWidth={isActive ? 2.2 : 1.8} className="transition-all duration-150" />
+                  {badge > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                      {badge > 99 ? '99+' : badge}
+                    </span>
+                  )}
                 </span>
                 <span className="text-[11px] font-medium leading-none">{item.label}</span>
               </span>
@@ -261,7 +276,7 @@ function AndroidBottomNav() {
   );
 }
 
-function AndroidLayout() {
+function AndroidLayout({ unread = 0 }) {
   const { terminalOpen, logs, toggleTerminal, clearLogs } = useSettings();
 
   return (
@@ -279,7 +294,7 @@ function AndroidLayout() {
       )}
 
       {/* 底部导航栏（Material Bottom Navigation） */}
-      <AndroidBottomNav />
+      <AndroidBottomNav unread={unread} />
     </div>
   );
 }
@@ -287,6 +302,21 @@ function AndroidLayout() {
 /* ===================== 入口：按平台选择布局 ===================== */
 
 export default function Layout() {
+  const { user } = useAuth();
   const android = useMemo(() => isAndroid(), []);
-  return android ? <AndroidLayout /> : <DesktopLayout />;
+  const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    if (user) {
+      api.getUnreadCount()
+        .then((d) => { if (active) setUnread(d.unreadCount || 0); })
+        .catch(() => {});
+    } else {
+      setUnread(0);
+    }
+    return () => { active = false; };
+  }, [user]);
+
+  return android ? <AndroidLayout unread={unread} /> : <DesktopLayout unread={unread} />;
 }
