@@ -9,7 +9,7 @@ import {
   Download, RefreshCw, Info, ExternalLink, Github, CheckCircle2, AlertCircle,
 } from 'lucide-react';
 
-const APP_VERSION = '1.1.4';
+const APP_VERSION = '1.1.5';
 const PLATFORM = 'app';
 
 function SettingsToggleRow({ label, icon: Icon, active, onClick }) {
