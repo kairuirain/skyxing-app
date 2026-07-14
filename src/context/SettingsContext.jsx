@@ -8,6 +8,7 @@ export function SettingsProvider({ children }) {
   const [theme, setTheme] = useState('dark');
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [debugMode, setDebugMode] = useState(false);
+  const [updateChannel, setUpdateChannel] = useState('stable');
   const [logs, setLogs] = useState([]);
   const logsRef = useRef([]);
 
@@ -18,13 +19,14 @@ export function SettingsProvider({ children }) {
       if (saved.theme) setTheme(saved.theme);
       if (typeof saved.terminalOpen === 'boolean') setTerminalOpen(saved.terminalOpen);
       if (typeof saved.debugMode === 'boolean') setDebugMode(saved.debugMode);
+      if (saved.updateChannel) setUpdateChannel(saved.updateChannel);
     } catch { /* ignore */ }
   }, []);
 
   // 持久化设置
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ theme, terminalOpen, debugMode }));
-  }, [theme, terminalOpen, debugMode]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ theme, terminalOpen, debugMode, updateChannel }));
+  }, [theme, terminalOpen, debugMode, updateChannel]);
 
   // 应用主题到根节点，并同步 Tauri 原生窗口标题栏配色（仅 Tauri 环境）
   useEffect(() => {
@@ -71,7 +73,7 @@ export function SettingsProvider({ children }) {
 
   return (
     <SettingsContext.Provider
-      value={{ theme, terminalOpen, debugMode, logs, toggleTheme, toggleTerminal, toggleDebug, clearLogs }}
+      value={{ theme, terminalOpen, debugMode, updateChannel, setUpdateChannel, logs, toggleTheme, toggleTerminal, toggleDebug, clearLogs }}
     >
       {children}
     </SettingsContext.Provider>
