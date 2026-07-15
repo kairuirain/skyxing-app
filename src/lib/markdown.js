@@ -3,78 +3,94 @@
  * 支持常用语法，同时保留内嵌 HTML（透传不作处理）
  */
 
-function escapeHTML(text) {
-  const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;' };
-  return text.replace(/[&<>"']/g, c => map[c]);
-}
+const HTML_ESCAPE = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;' };
 
-export function markdownToHTML(md) {
+function esc(t) { return t.replace(/[&<>"']/g, c => HTML_ESCAPE[c]); }
+
+function mdToHtml(md) {
   if (!md || typeof md !== 'string') return '';
-  let html = md;
-  const codeBlocks = [];
-  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
-    const idx = codeBlocks.length;
-    codeBlocks.push(`<pre><code${lang ? ` class="language-${lang}"` : ''}>${escapeHTML(code.trim())}</code></pre>`);
-    return `\`\`\`CODEBLOCK_${idx}\`\`\``;
+  let h = md;
+
+  // 保护代码块
+  const cbs = [];
+  h = h.replace(/```(\w*)\n([\s\S]*?)```/g, (_, l, c) => {
+    const i = cbs.length;
+    cbs.push(`<pre><code${l ? ` class="language-${l}"` : ''}>${esc(c.trim())}</code></pre>`);
+    return `\x00CB${i}\x00`;
   });
-  const inlineCodes = [];
-  html = html.replace(/`([^`]+)`/g, (_, code) => {
-    const idx = inlineCodes.length;
-    inlineCodes.push(`<code>${escapeHTML(code)}</code>`);
-    return `\`INLINECODE_${idx}\``;
+
+  // 保护行内代码
+  const ics = [];
+  h = h.replace(/`([^`]+)`/g, (_, c) => {
+    const i = ics.length;
+    ics.push(`<code>${esc(c)}</code>`);
+    return `\x00IC${i}\x00`;
   });
-  const lines = html.split('\n');
-  const result = [];
-  let inParagraph = false;
-  function closeParagraph() { if (inParagraph) { result.push('</p>'); inParagraph = false; } }
-  function processInline(text) {
-    if (!text) return '';
-    let t = text.replace(/`INLINECODE_(\d+)`/g, (_, idx) => inlineCodes[parseInt(idx)] || '');
-    t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    t = t.replace(/__(.+?)__/g, '<strong>$1</strong>');
-    t = t.replace(/\*(.+?)\*/g, '<em>$1</em>');
-    t = t.replace(/_(.+?)_/g, '<em>$1</em>');
-    t = t.replace(/~~(.+?)~~/g, '<del>$1</del>');
-    t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
-    t = t.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" />');
-    return t;
+
+  // 行内样式处理
+  function il(t) {
+    if (!t) return '';
+    let r = t.replace(/\x00IC(\d+)\x00/g, (_, i) => ics[+i] || '');
+    r = r.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    r = r.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+    r = r.replace(/~~(.+?)~~/g, '<del>$1</del>');
+    r = r.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    r = r.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" />');
+    return r;
   }
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const trimmed = line.trim();
-    if (!trimmed) { closeParagraph(); continue; }
-    if (/^```CODEBLOCK_(\d+)```$/.test(trimmed)) { closeParagraph(); result.push(codeBlocks[parseInt(RegExp.$1)]); continue; }
-    if (/^(-{3,}|\*{3,})$/.test(trimmed)) { closeParagraph(); result.push('<hr />'); continue; }
-    if (/^(#{1,6})\s+(.+)$/.test(trimmed)) { closeParagraph(); const l = RegExp.$1.length; result.push(`<h${l}>${processInline(RegExp.$2)}</h${l}>`); continue; }
-    if (/^>\s+(.+)$/.test(trimmed)) { closeParagraph(); result.push(`<blockquote>${processInline(RegExp.$1)}</blockquote>`); continue; }
-    if (/^[-*]\s+(.+)$/.test(trimmed)) { closeParagraph(); result.push(`<li>${processInline(RegExp.$1)}</li>`); continue; }
-    if (/^\d+\.\s+(.+)$/.test(trimmed)) { closeParagraph(); result.push(`<li>${processInline(RegExp.$1)}</li>`); continue; }
-    if (!inParagraph) { result.push('<p>'); inParagraph = true; } else { result.push('\n'); }
-    result.push(processInline(trimmed));
+
+  const lines = h.split('\n');
+  const out = [];
+  let inP = false;
+
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t) { if (inP) { out.push('</p>'); inP = false; } continue; }
+
+    // 恢复代码块
+    const cbMatch = t.match(/^\x00CB(\d+)\x00$/);
+    if (cbMatch) { if (inP) { out.push('</p>'); inP = false; } out.push(cbs[+cbMatch[1]]); continue; }
+
+    // 水平线
+    if (/^(-{3,}|\*{3,})$/.test(t)) { if (inP) { out.push('</p>'); inP = false; } out.push('<hr />'); continue; }
+
+    // 标题
+    const hMatch = t.match(/^(#{1,6})\s+(.+)$/);
+    if (hMatch) { if (inP) { out.push('</p>'); inP = false; } out.push(`<h${hMatch[1].length}>${il(hMatch[2])}</h${hMatch[1].length}>`); continue; }
+
+    // 引用
+    const qMatch = t.match(/^>\s+(.+)$/);
+    if (qMatch) { if (inP) { out.push('</p>'); inP = false; } out.push(`<blockquote>${il(qMatch[1])}</blockquote>`); continue; }
+
+    // 列表项
+    const lMatch = t.match(/^[-*]\s+(.+)$/);
+    if (lMatch) { if (inP) { out.push('</p>'); inP = false; } out.push(`<li>${il(lMatch[1])}</li>`); continue; }
+    const oMatch = t.match(/^\d+\.\s+(.+)$/);
+    if (oMatch) { if (inP) { out.push('</p>'); inP = false; } out.push(`<li>${il(oMatch[1])}</li>`); continue; }
+
+    // 段落
+    if (!inP) { out.push('<p>'); inP = true; } else { out.push('\n'); }
+    out.push(il(t));
   }
-  closeParagraph();
-  return result.join('')
-    .replace(/(?:<li>.*?<\/li>(?:\s*<li>.*?<\/li>)*)/g, '<ul>$&</ul>');
+  if (inP) out.push('</p>');
+
+  let html = out.join('');
+  // 包裹列表
+  html = html.replace(/((?:<li>.*?<\/li>(?:\s*<li>.*?<\/li>)*))/g, '<ul>$1</ul>');
+  return html;
 }
 
-export function rewriteExternalLinks(html) {
+function rewriteLinks(html) {
   if (!html) return '';
   return html.replace(
     /<a\s+([^>]*?)href="(https?:\/\/[^"]+)"([^>]*)>/gi,
-    (match, before, url, after) => {
-      return `<a ${before}href="/link?url=${encodeURIComponent(url)}"${after}>`;
-    }
+    (_, b, u, a) => `<a ${b}href="/link?url=${encodeURIComponent(u)}"${a}>`
   );
 }
 
-export function looksLikeHTML(content) {
-  return /^\s*</.test(content);
-}
+function looksLikeHTML(c) { return /^\s*</.test(c); }
 
 export function prepareArticleContent(content) {
   if (!content) return '';
-  const isHTML = looksLikeHTML(content);
-  let html = isHTML ? content : markdownToHTML(content);
-  html = rewriteExternalLinks(html);
-  return html;
+  return rewriteLinks(looksLikeHTML(content) ? content : mdToHtml(content));
 }
