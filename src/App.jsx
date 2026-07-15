@@ -12,6 +12,7 @@ import PodcastPage from './pages/PodcastPage';
 import MinePage from './pages/MinePage';
 import MessagesPage from './pages/MessagesPage';
 import ConversationPage from './pages/ConversationPage';
+import LinkRedirect from './pages/LinkRedirect';
 import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="/messages" element={<MessagesPage />} />
         <Route path="/messages/:convId" element={<ConversationPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/link" element={<LinkRedirect />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

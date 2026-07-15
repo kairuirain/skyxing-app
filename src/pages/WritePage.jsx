@@ -35,8 +35,12 @@ export default function WritePage() {
         <input type="text" value={coverImage} onChange={e=>setCoverImage(e.target.value)} className="input" placeholder="封面图片URL (可选)" />
         <input type="text" value={tags} onChange={e=>setTags(e.target.value)} className="input" placeholder="标签, 逗号分隔 (可选)" />
         <textarea value={excerpt} onChange={e=>setExcerpt(e.target.value)} className="input resize-none" rows={2} placeholder="摘要 (可选)" />
-        <textarea value={content} onChange={e=>setContent(e.target.value)} className="input resize-none font-mono text-sm" rows={16} placeholder="内容 (支持HTML)..." required />
-        <p className="text-xs text-gray-400">支持HTML: &lt;h2&gt;, &lt;p&gt;, &lt;img&gt;, &lt;pre&gt;&lt;code&gt; 等</p>
+        <textarea value={content} onChange={e=>setContent(e.target.value)} className="input resize-none font-mono text-sm" rows={16} placeholder="支持 Markdown + 内嵌 HTML..." required />
+        <div className="text-xs text-gray-400 space-y-0.5">
+          <p>Markdown: #标题 **加粗** *斜体* `代码` [链接](url) ![]()图片</p>
+          <p>也支持直接写 HTML &lt;h2&gt;&lt;p&gt;&lt;img&gt; 等（安全过滤）</p>
+          <p>外部链接会自动经过安全跳转页提醒</p>
+        </div>
         <div className="flex gap-2"><button type="submit" disabled={loading} className="btn-primary btn-sm"><Save size={14} className="mr-1"/>{loading?'发布中':'发布'}</button><button type="button" onClick={()=>navigate(-1)} className="btn-outline btn-sm"><X size={14} className="mr-1"/>取消</button></div>
       </form>
     </div>
