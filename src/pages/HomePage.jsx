@@ -47,7 +47,7 @@ export default function HomePage() {
   useEffect(() => {
     if (user) {
       api.getUnreadCount().then((d) => setUnread(d.unreadCount || 0)).catch(() => {});
-      api.request('/updates/notice?platform=app&current=1.2.1')
+      api.request('/updates/notice?platform=' + __APP_PLATFORM__ + '&current=' + __APP_VERSION__)
         .then((d) => setNotices(d.notices || [])).catch(() => {});
     }
   }, [user]);

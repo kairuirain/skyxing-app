@@ -1,7 +1,7 @@
 {
   "name": "skyxing-app",
   "private": true,
-  "version": "1.2.3",
+  "version": "1.2.3.01-a",
   "type": "module",
   "scripts": {
     "dev": "vite",

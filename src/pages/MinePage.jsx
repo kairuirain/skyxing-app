@@ -11,8 +11,8 @@ import {
   Bell,
 } from 'lucide-react';
 
-const APP_VERSION = '1.2.1';
-const PLATFORM = 'app';
+const APP_VERSION = __APP_VERSION__;
+const PLATFORM = __APP_PLATFORM__;
 
 function SettingsToggleRow({ label, icon: Icon, active, onClick }) {
   return (
