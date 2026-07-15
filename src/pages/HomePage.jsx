@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import useSync from '../hooks/useSync';
 import { isAndroid } from '../lib/platform';
 import {
   Calendar, Eye, Tag, User, Search as SearchIcon, PenSquare,
-  Bell, MessageSquare, ArrowRight, Sparkles, AlertCircle, X,
+  Bell, MessageSquare, ArrowRight, Sparkles, AlertCircle, X, Pin,
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -23,6 +24,7 @@ export default function HomePage() {
   const [notices, setNotices] = useState([]);
 
   useEffect(() => { loadArticles(); loadTags(); }, [page, selectedTag]);
+  useSync(loadArticles, { enabled: !selectedTag && !search });
 
   useEffect(() => {
     if (user) {
@@ -166,9 +168,16 @@ export default function HomePage() {
               {articles.map((a) => (
                 <Link key={a.id} to={`/article/${a.id}`}
                   className="group block bg-[var(--win-card)] border border-[var(--win-border)] rounded-lg p-4 hover:border-[var(--win-border-strong)] hover:bg-[var(--win-card-hover)] transition-colors">
-                  <h2 className="text-[15px] font-semibold text-[var(--win-text)] mb-1 group-hover:text-[var(--win-accent)] transition-colors">
-                    {a.title}
-                  </h2>
+                  <div className="flex items-center gap-2 mb-1">
+                    {a.pinned && (
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-primary-100 text-primary-700 text-[10px] font-semibold">
+                        <Pin size={9} /> 置顶
+                      </span>
+                    )}
+                    <h2 className="text-[15px] font-semibold text-[var(--win-text)] group-hover:text-[var(--win-accent)] transition-colors">
+                      {a.title}
+                    </h2>
+                  </div>
                   <p className="text-[13px] text-[var(--win-text-secondary)] mb-2.5 line-clamp-2 leading-relaxed">
                     {a.excerpt || a.content?.replace(/<[^>]*>/g, '').slice(0, 150)}
                   </p>
