@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
-import { Calendar, Eye, Tag, User, Search as SearchIcon } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Calendar, Eye, Tag, User, Search as SearchIcon, PenSquare } from 'lucide-react';
 
 export default function HomePage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [articles, setArticles] = useState([]);
   const [pagination, setPagination] = useState(null);
   const [tags, setTags] = useState([]);
@@ -147,6 +150,17 @@ export default function HomePage() {
           </>
         )}
       </div>
+
+      {/* 写文章浮动按钮（仅登录后显示） */}
+      {user && (
+        <button
+          onClick={() => navigate('/write')}
+          className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-[var(--win-accent)] text-[var(--win-on-accent)] shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center z-50"
+          title="写文章"
+        >
+          <PenSquare size={24} />
+        </button>
+      )}
     </div>
   );
 }
