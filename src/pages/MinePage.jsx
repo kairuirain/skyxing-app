@@ -8,9 +8,10 @@ import {
   FileText, PenSquare, LogOut, LogIn, Shield, Terminal, Palette, Bug,
   Download, RefreshCw, Info, AlertCircle,
   X, User as UserIcon,
+  Bell,
 } from 'lucide-react';
 
-const APP_VERSION = '1.2.0';
+const APP_VERSION = '1.2.1';
 const PLATFORM = 'app';
 
 function SettingsToggleRow({ label, icon: Icon, active, onClick }) {
@@ -46,20 +47,24 @@ export default function MinePage() {
   const { theme, terminalOpen, debugMode, updateChannel, setUpdateChannel, toggleTheme, toggleTerminal, toggleDebug } = useSettings();
   const android = isAndroid();
 
-  // ———— 自制 OTA 更新系统 ————
-  const [update, setUpdate] = useState({ checking: false, error: null, hasUpdate: false, latest: null, checked: false });
+  // ———— 自制 OTA 更新系统 (v3) ————
+  const [update, setUpdate] = useState({ checking: false, error: null, hasUpdate: false, latest: null, checked: false, notices: [] });
 
   const checkUpdate = useCallback(async () => {
     setUpdate((u) => ({ ...u, checking: true, error: null }));
     try {
       const data = await api.checkUpdate(PLATFORM, APP_VERSION, updateChannel);
-      setUpdate((u) => ({ ...u, checking: false, checked: true, hasUpdate: data.hasUpdate, latest: data.release }));
+      setUpdate((u) => ({ ...u, checking: false, checked: true, hasUpdate: data.hasUpdate, latest: data.release, notices: data.notices || [] }));
     } catch (e) {
       setUpdate((u) => ({ ...u, checking: false, error: e.message || '检查失败' }));
     }
   }, [updateChannel]);
 
   useEffect(() => { checkUpdate(); }, [checkUpdate]);
+
+  const dismissNotice = (id) => {
+    setUpdate((u) => ({ ...u, notices: u.notices.filter((n) => n.id !== id) }));
+  };
 
   const handleDownload = () => {
     const url = update.latest?.download?.recommendedUrl || update.latest?.download?.url;
@@ -123,6 +128,28 @@ export default function MinePage() {
   return (
     <div className="min-h-full flex flex-col px-6 py-6">
       <UpdateModal />
+
+      {/* OTA v3 自定义通知条 */}
+      {update.notices.map((n) => (
+        <div key={n.id} className={'mb-4 rounded-xl p-4 flex items-start gap-3 border ' +
+          (n.type === 'warn' ? 'bg-amber-50 border-amber-200' : n.type === 'action' ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200')}>
+          <AlertCircle size={18} className={n.type === 'warn' ? 'text-amber-500 shrink-0 mt-0.5' : n.type === 'action' ? 'text-blue-500 shrink-0 mt-0.5' : 'text-gray-400 shrink-0 mt-0.5'} />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-800 mb-0.5">{n.title}</p>
+            <p className="text-sm text-gray-600">{n.body}</p>
+            {n.actionUrl && (
+              <button onClick={() => openExternal(n.actionUrl)} className="mt-2 text-sm font-medium text-blue-600 hover:underline">
+                {n.actionLabel || '前往'} →
+              </button>
+            )}
+          </div>
+          {n.dismissible !== false && (
+            <button onClick={() => dismissNotice(n.id)} className="shrink-0 text-gray-400 hover:text-gray-600 transition-colors">
+              <X size={16} />
+            </button>
+          )}
+        </div>
+      ))}
 
       <div className="bg-[var(--win-card)] border border-[var(--win-border)] rounded-xl p-5 mb-6">
         <div className="flex items-center gap-4">
