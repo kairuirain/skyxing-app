@@ -23,17 +23,7 @@ export default function HomePage() {
   const [unread, setUnread] = useState(0);
   const [notices, setNotices] = useState([]);
 
-  useEffect(() => { loadArticles(); loadTags(); }, [page, selectedTag]);
-  useSync(loadArticles, { enabled: !selectedTag && !search });
-
-  useEffect(() => {
-    if (user) {
-      api.getUnreadCount().then((d) => setUnread(d.unreadCount || 0)).catch(() => {});
-      api.request('/updates/notice?platform=app&current=1.2.1')
-        .then((d) => setNotices(d.notices || [])).catch(() => {});
-    }
-  }, [user]);
-
+  // 函数声明必须放在 hooks 之前，避免 const TDZ
   const loadArticles = async () => {
     setLoading(true);
     try {
@@ -50,6 +40,17 @@ export default function HomePage() {
   const loadTags = async () => {
     try { const data = await api.getTags(); setTags(data.tags || []); } catch (e) {}
   };
+
+  useEffect(() => { loadArticles(); loadTags(); }, [page, selectedTag]);
+  useSync(loadArticles, { enabled: !selectedTag && !search });
+
+  useEffect(() => {
+    if (user) {
+      api.getUnreadCount().then((d) => setUnread(d.unreadCount || 0)).catch(() => {});
+      api.request('/updates/notice?platform=app&current=1.2.1')
+        .then((d) => setNotices(d.notices || [])).catch(() => {});
+    }
+  }, [user]);
 
   const handleSearch = (e) => { e.preventDefault(); setPage(1); loadArticles(); };
   const formatDate = (d) => new Date(d).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
