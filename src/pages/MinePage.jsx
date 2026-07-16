@@ -35,7 +35,7 @@ function SectionTitle({ children }) {
 function openExternal(url) {
   const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
   if (isTauri) {
-    import('@tauri-apps/plugin-shell').then((m) => m.open(url)).catch(() => window.open(url, '_blank'));
+    import('@tauri-apps/plugin-opener').then((m) => m.openUrl(url)).catch(() => window.open(url, '_blank'));
   } else {
     window.open(url, '_blank');
   }

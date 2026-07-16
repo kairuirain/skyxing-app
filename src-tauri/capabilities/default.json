@@ -12,6 +12,7 @@
       ]
     },
     "shell:allow-open",
+    "opener:default",
     "core:window:default",
     "core:window:allow-show",
     "core:window:allow-hide",
