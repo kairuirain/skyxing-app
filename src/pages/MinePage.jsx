@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { prepareArticleContent } from '../lib/markdown.js';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
@@ -121,9 +122,7 @@ export default function MinePage() {
           </div>
           <div className="p-5 bg-white">
             {notes && (
-              <div className="mb-4 max-h-28 overflow-y-auto text-xs text-gray-600 leading-relaxed bg-gray-50 rounded-lg p-3">
-                {notes}
-              </div>
+              <div className="mb-4 max-h-28 overflow-y-auto text-xs text-gray-600 leading-relaxed bg-gray-50 rounded-lg p-3 prose prose-sm max-w-none" dangerouslySetInnerHTML={{__html:notes.replace(/\n/g, '<br/>')}} />
             )}
             <button onClick={handleDownload} className="w-full py-2.5 rounded-xl text-white font-medium text-sm bg-gradient-to-r from-[#fb7299] to-[#00a1d6] hover:opacity-90 transition-opacity">
               立即更新
