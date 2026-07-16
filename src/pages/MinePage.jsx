@@ -48,17 +48,41 @@ export default function MinePage() {
   const android = isAndroid();
 
   // ———— 自制 OTA 更新系统 (v3) ————
-  const [update, setUpdate] = useState({ checking: false, error: null, hasUpdate: false, latest: null, checked: false, notices: [] });
+  const [update, setUpdate] = useState({ checking: false, error: null, hasUpdate: false, latest: null, checked: false, notices: [], channelSwitch: null });
+  const [channelSwitchPending, setChannelSwitchPending] = useState(null);
 
   const checkUpdate = useCallback(async () => {
     setUpdate((u) => ({ ...u, checking: true, error: null }));
     try {
       const data = await api.checkUpdate(PLATFORM, APP_VERSION, updateChannel);
-      setUpdate((u) => ({ ...u, checking: false, checked: true, hasUpdate: data.hasUpdate, latest: data.release, notices: data.notices || [] }));
+      const hasUpdate = data.hasUpdate;
+      const sw = data.channelSwitch || null;
+
+      // 如果涉及渠道切换，先弹出确认框
+      if (sw && hasUpdate) {
+        setChannelSwitchPending(sw);
+        // 暂不设置 hasUpdate，等用户确认后再触发
+        setUpdate((u) => ({ ...u, checking: false, checked: true, latest: data.release, notices: data.notices || [], channelSwitch: sw, hasUpdate: false }));
+        return;
+      }
+
+      setUpdate((u) => ({ ...u, checking: false, checked: true, hasUpdate, latest: data.release, notices: data.notices || [], channelSwitch: sw }));
     } catch (e) {
       setUpdate((u) => ({ ...u, checking: false, error: e.message || '检查失败' }));
     }
   }, [updateChannel]);
+
+  // 用户确认渠道切换
+  const confirmChannelSwitch = () => {
+    setChannelSwitchPending(null);
+    setUpdate((u) => ({ ...u, hasUpdate: true }));
+  };
+
+  // 用户拒绝渠道切换
+  const rejectChannelSwitch = () => {
+    setChannelSwitchPending(null);
+    setUpdate((u) => ({ ...u, channelSwitch: null }));
+  };
 
   useEffect(() => { checkUpdate(); }, [checkUpdate]);
 
@@ -127,6 +151,27 @@ export default function MinePage() {
 
   return (
     <div className="min-h-full flex flex-col px-6 py-6">
+      {/* 渠道切换确认弹窗 */}
+      {channelSwitchPending && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fadeIn">
+          <div className="w-[360px] rounded-2xl overflow-hidden shadow-2xl animate-scaleIn bg-white p-6 text-center">
+            <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
+              <RefreshCw size={22} className="text-amber-600" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">切换更新渠道</h3>
+            <p className="text-sm text-gray-600 mb-2">
+              您将从<span className="font-semibold mx-1">{channelSwitchPending.from === 'beta' ? '测试版' : '正式版'}</span>
+              切换到<span className="font-semibold mx-1">{channelSwitchPending.to === 'beta' ? '测试版' : '正式版'}</span>。
+            </p>
+            <p className="text-xs text-gray-400 mb-6">是否继续检查该渠道的最新版本？</p>
+            <div className="flex gap-3 justify-center">
+              <button onClick={rejectChannelSwitch} className="btn-outline btn-sm min-w-[100px]">取消</button>
+              <button onClick={confirmChannelSwitch} className="btn-primary btn-sm min-w-[100px]">继续</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <UpdateModal />
 
       {/* OTA v3 自定义通知条 */}

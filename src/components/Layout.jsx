@@ -2,7 +2,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Home, Podcast, User, LogOut, PenSquare, Terminal, Palette, Bug, MessageSquare } from 'lucide-react';
+import { Home, Podcast, User, LogOut, PenSquare, Terminal, Palette, Bug, MessageSquare, RefreshCw } from 'lucide-react';
 import { isAndroid } from '../lib/platform';
 import api from '../lib/api';
 
@@ -220,7 +220,15 @@ function DesktopLayout({ unread = 0 }) {
       </nav>
 
       {/* ===== Content region ===== */}
-      <main className="flex-1 min-w-0 flex flex-col bg-[var(--win-bg)]">
+      <main className="flex-1 min-w-0 flex flex-col bg-[var(--win-bg)] relative">
+        {/* 右上角刷新按钮（所有页面通用） */}
+        <button
+          onClick={() => window.location.reload()}
+          className="absolute top-3 right-3 z-20 w-8 h-8 rounded-lg bg-white/80 backdrop-blur border border-gray-200 shadow-sm flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-white hover:shadow-md transition-all"
+          title="刷新页面"
+        >
+          <RefreshCw size={15} />
+        </button>
         <div className="flex-1 overflow-y-auto win-scroll">
           <Outlet />
         </div>
@@ -282,7 +290,15 @@ function AndroidLayout({ unread = 0 }) {
   return (
     <div className="android-app flex flex-col h-[100dvh] w-full overflow-hidden bg-[var(--win-bg)] text-[var(--win-text)] font-win">
       {/* 主内容区域（可滚动，内部页面自带顶部应用栏） */}
-      <main className="flex-1 min-h-0 overflow-y-auto win-scroll">
+      <main className="flex-1 min-h-0 overflow-y-auto win-scroll relative">
+        {/* 右上角刷新按钮 */}
+        <button
+          onClick={() => window.location.reload()}
+          className="absolute top-3 right-3 z-20 w-8 h-8 rounded-lg bg-white/80 backdrop-blur border border-gray-200 shadow-sm flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-white hover:shadow-md transition-all"
+          title="刷新页面"
+        >
+          <RefreshCw size={15} />
+        </button>
         <Outlet />
       </main>
 
