@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
@@ -9,6 +9,7 @@ export default function ArticlePage() {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const contentRef = useRef(null);
   const [article, setArticle] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
@@ -28,6 +29,23 @@ export default function ArticlePage() {
   }, [id]);
 
   useEffect(() => { loadArticle(); loadComments(); }, [loadArticle, loadComments]);
+
+  // 拦截文章内链接点击，使用 React Router 导航（避免 Tauri webview 整页跳转）
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    const handler = (e) => {
+      const a = e.target.closest('a');
+      if (!a) return;
+      const href = a.getAttribute('href');
+      if (href && href.startsWith('/link?')) {
+        e.preventDefault();
+        navigate(href);
+      }
+    };
+    el.addEventListener('click', handler);
+    return () => el.removeEventListener('click', handler);
+  }, [navigate]);
 
   const handleComment = async (e) => {
     e.preventDefault();
@@ -77,7 +95,7 @@ export default function ArticlePage() {
         <button onClick={handleDeleteArticle} className="btn-danger btn-sm"><Trash2 size={13} className="mr-1"/>删除</button>
       </div>}
       {article.coverImage && <img src={article.coverImage} alt="" className="w-full rounded-lg mb-5 max-h-80 object-cover"/>}
-      <div className="article-content mb-8" dangerouslySetInnerHTML={{__html:prepareArticleContent(article.content)}}/>
+      <div ref={contentRef} className="article-content mb-8" dangerouslySetInnerHTML={{__html:prepareArticleContent(article.content)}}/>
 
       {article.author && <div className="card p-4 mb-6 flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold">{article.author.displayName?.[0]}</div><div><Link to={`/user/${article.author.id}`} className="font-semibold text-sm hover:text-primary-600">{article.author.displayName}</Link>{article.author.bio&&<p className="text-xs text-gray-500">{article.author.bio}</p>}</div></div>}
 
