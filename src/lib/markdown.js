@@ -80,11 +80,17 @@ function mdToHtml(md) {
   return html;
 }
 
+// 中间跳转域名：必须使用绝对 URL，避免被 Tauri WebView 的
+// tauri.localhost 本地协议解析为 http://tauri.localhost/link?url=...
+// 统一走 skyxing.dpdns.org 的 SPA 路由，服务器返回 React 应用，
+// 再由 LinkRedirect 路由处理确认页与外部链接打开。
+const LINK_BASE_URL = 'https://skyxing.dpdns.org';
+
 function rewriteLinks(html) {
   if (!html) return '';
   return html.replace(
     /<a\s+([^>]*?)href="(https?:\/\/[^"]+)"([^>]*)>/gi,
-    (_, b, u, a) => `<a ${b}href="/link?url=${encodeURIComponent(u)}"${a}>`
+    (_, b, u, a) => `<a ${b}href="${LINK_BASE_URL}/link?url=${encodeURIComponent(u)}"${a}>`
   );
 }
 

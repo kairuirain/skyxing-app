@@ -19,7 +19,15 @@ export default function LinkRedirect() {
   const decodedUrl = decodeURIComponent(targetUrl);
   const hostname = (() => { try { return new URL(decodedUrl).hostname; } catch { return '未知域名'; } })();
 
-  const handleConfirm = () => { setConfirmed(true); window.open(decodedUrl, '_blank', 'noopener,noreferrer'); };
+  const handleConfirm = () => {
+    setConfirmed(true);
+    const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+    if (isTauri) {
+      import('@tauri-apps/plugin-opener').then((m) => m.openUrl(decodedUrl)).catch(() => window.open(decodedUrl, '_blank'));
+    } else {
+      window.open(decodedUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
 
   return (
     <div className="max-w-lg mx-auto py-8 px-4">

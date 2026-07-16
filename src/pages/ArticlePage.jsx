@@ -1,15 +1,22 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
 import { Calendar, Eye, Tag, User, Send, Trash2, Edit3, Pin, PinOff } from 'lucide-react';
 import { prepareArticleContent } from '../lib/markdown.js';
 
+// 外部链接重定向基础 URL（必须与 markdown.js 中的 LINK_BASE_URL 保持一致）。
+// 链接在 markdown.js 中已被改写为该绝对 URL，因此这里需要拦截并解析
+// ?url= 参数，再走本地 React Router 跳转到 /link 路由，
+// 既能避免被 Tauri WebView 的 tauri.localhost origin 解析为
+// http://tauri.localhost/link?url=...，又能保留本地应用状态，
+// 由 LinkRedirect 组件统一负责安全确认与外部链接打开。
+const LINK_BASE = 'https://skyxing.dpdns.org';
+
 export default function ArticlePage() {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const contentRef = useRef(null);
   const [article, setArticle] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
@@ -30,22 +37,34 @@ export default function ArticlePage() {
 
   useEffect(() => { loadArticle(); loadComments(); }, [loadArticle, loadComments]);
 
-  // 拦截文章内链接点击，使用 React Router 导航（避免 Tauri webview 整页跳转）
+  // 拦截文章内重定向链接点击：使用事件委托统一处理，
+  // 无论链接是绝对 URL（https://skyxing.dpdns.org/link?url=...）
+  // 还是相对路径（/link?url=...）都能正确提取参数后跳转到本地 /link 路由。
+  // 必须以 document 为目标并在依赖中包含 article，
+  // 避免初次渲染 contentRef 还未挂载时 effect 提前 return 导致拦截失效。
   useEffect(() => {
-    const el = contentRef.current;
-    if (!el) return;
+    if (!article) return;
     const handler = (e) => {
-      const a = e.target.closest('a');
+      const a = e.target.closest && e.target.closest('a');
       if (!a) return;
       const href = a.getAttribute('href');
-      if (href && href.startsWith('/link?')) {
+      if (!href) return;
+      // 匹配 https://skyxing.dpdns.org/link?url=...
+      if (href.startsWith(`${LINK_BASE}/link?url=`)) {
+        e.preventDefault();
+        const qs = href.substring(`${LINK_BASE}/link?`.length);
+        navigate(`/link?${qs}`);
+        return;
+      }
+      // 兼容旧文章里的相对路径 /link?url=...
+      if (href.startsWith('/link?url=')) {
         e.preventDefault();
         navigate(href);
       }
     };
-    el.addEventListener('click', handler);
-    return () => el.removeEventListener('click', handler);
-  }, [navigate]);
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, [navigate, article]);
 
   const handleComment = async (e) => {
     e.preventDefault();
@@ -95,7 +114,7 @@ export default function ArticlePage() {
         <button onClick={handleDeleteArticle} className="btn-danger btn-sm"><Trash2 size={13} className="mr-1"/>删除</button>
       </div>}
       {article.coverImage && <img src={article.coverImage} alt="" className="w-full rounded-lg mb-5 max-h-80 object-cover"/>}
-      <div ref={contentRef} className="article-content mb-8" dangerouslySetInnerHTML={{__html:prepareArticleContent(article.content)}}/>
+      <div className="article-content mb-8" dangerouslySetInnerHTML={{__html:prepareArticleContent(article.content)}}/>
 
       {article.author && <div className="card p-4 mb-6 flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold">{article.author.displayName?.[0]}</div><div><Link to={`/user/${article.author.id}`} className="font-semibold text-sm hover:text-primary-600">{article.author.displayName}</Link>{article.author.bio&&<p className="text-xs text-gray-500">{article.author.bio}</p>}</div></div>}
 
