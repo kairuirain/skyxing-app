@@ -13,7 +13,11 @@ import {
 } from 'lucide-react';
 
 const APP_VERSION = __APP_VERSION__;
-const PLATFORM = __APP_PLATFORM__;
+
+function getPlatform() {
+  // Android 端应使用 'android' 平台，以便后端匹配 .apk 文件
+  return isAndroid() ? 'android' : 'app'; // 'app' 对应 Windows .exe/.msi 等桌面安装包
+}
 
 function SettingsToggleRow({ label, icon: Icon, active, onClick }) {
   return (
@@ -55,7 +59,7 @@ export default function MinePage() {
   const checkUpdate = useCallback(async () => {
     setUpdate((u) => ({ ...u, checking: true, error: null }));
     try {
-      const data = await api.checkUpdate(PLATFORM, APP_VERSION, updateChannel);
+      const data = await api.checkUpdate(getPlatform(), APP_VERSION, updateChannel);
       const hasUpdate = data.hasUpdate;
       const sw = data.channelSwitch || null;
 
