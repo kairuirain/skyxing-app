@@ -6,6 +6,7 @@ import { Home, Podcast, User, LogOut, PenSquare, Terminal, Palette, Bug, Message
 import { isAndroid } from '../lib/platform';
 import api from '../lib/api';
 import AnimatedOutlet from './AnimatedOutlet';
+import Spinner from './Spinner';
 
 const NAV_ITEMS = [
   { to: '/', label: '主页', icon: Home, end: true },
@@ -194,7 +195,7 @@ function DesktopLayout({ unread = 0 }) {
                     {user.displayName || user.username}
                   </div>
                   <div className="text-[11px] text-[var(--win-text-tertiary)] truncate">
-                    {user.role === 'admin' ? '管理员' : '已登录'}
+                    {user.role === 'official' ? '官方' : user.role === 'admin' ? '管理员' : '已登录'}
                   </div>
                 </div>
                 <button
@@ -222,20 +223,20 @@ function DesktopLayout({ unread = 0 }) {
 
       {/* ===== Content region ===== */}
       <main className="flex-1 min-w-0 flex flex-col bg-[var(--win-bg)] relative">
-        {/* 右上角刷新按钮（所有页面通用） */}
-        <button
-          onClick={() => window.location.reload()}
-          className="absolute top-3 right-3 z-20 w-8 h-8 rounded-lg bg-white/80 backdrop-blur border border-gray-200 shadow-sm flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-white hover:shadow-md transition-all"
-          title="刷新页面"
-        >
-          <RefreshCw size={15} />
-        </button>
         <div className="flex-1 overflow-y-auto win-scroll">
           <AnimatedOutlet />
         </div>
         {terminalOpen && (
           <TerminalPanel logs={logs} onClose={toggleTerminal} onClear={clearLogs} />
         )}
+        {/* 右下角刷新按钮（Windows / 桌面端） */}
+        <button
+          onClick={() => window.location.reload()}
+          className="absolute bottom-5 right-5 z-30 w-12 h-12 rounded-full bg-[var(--win-accent)] text-[var(--win-on-accent)] shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center"
+          title="刷新页面"
+        >
+          <RefreshCw size={18} />
+        </button>
       </main>
     </div>
   );
@@ -287,19 +288,41 @@ function AndroidBottomNav({ unread = 0 }) {
 
 function AndroidLayout({ unread = 0 }) {
   const { terminalOpen, logs, toggleTerminal, clearLogs } = useSettings();
+  const touchStartY = useRef(0);
+  const [pull, setPull] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // 下拉刷新：仅在滚动到顶且向下拉动时触发
+  const onPullStart = (e) => {
+    touchStartY.current = e.currentTarget.scrollTop <= 0 ? e.touches[0].clientY : 0;
+  };
+  const onPullMove = (e) => {
+    if (!touchStartY.current) return;
+    const dy = e.touches[0].clientY - touchStartY.current;
+    if (dy > 0 && e.currentTarget.scrollTop <= 0) setPull(Math.min(dy * 0.5, 80));
+    else setPull(0);
+  };
+  const onPullEnd = () => {
+    if (pull > 56) { setRefreshing(true); window.location.reload(); }
+    else setPull(0);
+    touchStartY.current = 0;
+  };
 
   return (
     <div className="android-app flex flex-col h-[100dvh] w-full overflow-hidden bg-[var(--win-bg)] text-[var(--win-text)] font-win">
       {/* 主内容区域（可滚动，内部页面自带顶部应用栏） */}
-      <main className="flex-1 min-h-0 overflow-y-auto win-scroll relative">
-        {/* 右上角刷新按钮 */}
-        <button
-          onClick={() => window.location.reload()}
-          className="absolute top-3 right-3 z-20 w-8 h-8 rounded-lg bg-white/80 backdrop-blur border border-gray-200 shadow-sm flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-white hover:shadow-md transition-all"
-          title="刷新页面"
-        >
-          <RefreshCw size={15} />
-        </button>
+      <main
+        className="flex-1 min-h-0 overflow-y-auto win-scroll relative"
+        onTouchStart={onPullStart}
+        onTouchMove={onPullMove}
+        onTouchEnd={onPullEnd}
+        style={{ transform: pull > 0 ? `translateY(${pull}px)` : undefined, transition: refreshing ? 'transform 0.2s ease' : undefined }}
+      >
+        {pull > 0 && (
+          <div className="absolute top-2 left-0 right-0 flex justify-center pointer-events-none" style={{ height: pull }}>
+            <Spinner size={22} className={pull > 56 ? 'text-[var(--win-accent)]' : 'text-[var(--win-text-tertiary)]'} />
+          </div>
+        )}
         <AnimatedOutlet />
       </main>
 

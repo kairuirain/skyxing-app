@@ -62,7 +62,7 @@ export default function AdminPage() {
 
   if (loading) return <Loading />;
 
-  const roleColor = r => ({ user:'bg-gray-100 text-gray-700', author:'bg-blue-100 text-blue-700', admin:'bg-purple-100 text-purple-700' })[r]||'';
+  const roleColor = r => ({ user:'bg-gray-100 text-gray-700', admin:'bg-purple-100 text-purple-700', official:'bg-amber-100 text-amber-700' })[r]||'';
 
   return (
     <div>
@@ -78,7 +78,7 @@ export default function AdminPage() {
         <StatCard icon={<Eye size={18}/>} label="阅读" value={stats.totalViews} color="purple"/>
       </div>}
 
-      {tab==='users'&&<div className="card overflow-hidden"><table className="w-full text-sm"><thead><tr className="border-b"><th className="text-left p-3 text-gray-500">用户</th><th className="text-left p-3 text-gray-500">角色</th><th className="text-left p-3 text-gray-500">注册</th><th className="text-right p-3 text-gray-500">操作</th></tr></thead><tbody>{usersList.map(u=><tr key={u.id} className="border-b border-gray-50 hover:bg-gray-50"><td className="p-3"><div className="flex items-center gap-2"><div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold">{u.displayName?.[0]}</div><div><p className="font-medium text-xs">{u.displayName}</p><p className="text-xs text-gray-400">@{u.username}</p></div></div></td><td className="p-3"><select value={u.role} onChange={e=>handleRole(u.id,e.target.value)} className={`text-xs px-2 py-0.5 rounded-full border ${roleColor(u.role)}`} disabled={u.id===user.id}><option value="user">用户</option><option value="author">作者</option><option value="admin">管理员</option></select></td><td className="p-3 text-xs text-gray-500">{new Date(u.createdAt).toLocaleDateString('zh-CN')}</td><td className="p-3 text-right">{u.id!==user.id&&<button onClick={()=>handleDelUser(u.id)} className="text-red-500"><Trash2 size={14}/></button>}</td></tr>)}</tbody></table></div>}
+      {tab==='users'&&<div className="card overflow-hidden"><table className="w-full text-sm"><thead><tr className="border-b"><th className="text-left p-3 text-gray-500">用户</th><th className="text-left p-3 text-gray-500">角色</th><th className="text-left p-3 text-gray-500">注册</th><th className="text-right p-3 text-gray-500">操作</th></tr></thead><tbody>{usersList.map(u=><tr key={u.id} className="border-b border-gray-50 hover:bg-gray-50"><td className="p-3"><div className="flex items-center gap-2"><div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold">{u.displayName?.[0]}</div><div><p className="font-medium text-xs">{u.displayName}</p><p className="text-xs text-gray-400">@{u.username}</p></div></div></td><td className="p-3"><select value={u.role} onChange={e=>handleRole(u.id,e.target.value)} className={`text-xs px-2 py-0.5 rounded-full border ${roleColor(u.role)}`} disabled={u.id===user.id||user.role!=='official'}><option value="user">用户</option><option value="admin">管理员</option><option value="official">官方</option></select></td><td className="p-3 text-xs text-gray-500">{new Date(u.createdAt).toLocaleDateString('zh-CN')}</td><td className="p-3 text-right">{u.id!==user.id&&<button onClick={()=>handleDelUser(u.id)} className="text-red-500"><Trash2 size={14}/></button>}</td></tr>)}</tbody></table></div>}
 
       {tab==='articles'&&<div className="card overflow-hidden">
         <div className="px-3 py-2 border-b border-gray-100 flex items-center gap-2 text-xs text-gray-500">

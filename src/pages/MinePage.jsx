@@ -45,9 +45,9 @@ export default function MinePage() {
           <div className="flex-1 min-w-0">
             <h1 className="text-[18px] font-bold text-[var(--win-text)] truncate">{user?.displayName || user?.username}</h1>
             <p className="text-[13px] text-[var(--win-text-tertiary)] truncate">@{user?.username}</p>
-            {user?.role === 'admin' && (
+            {['admin','official'].includes(user?.role) && (
               <span className="inline-flex items-center gap-1 mt-1 text-[11px] text-[var(--win-accent)] font-semibold">
-                <ShieldCheck size={12} /> 管理员
+                <ShieldCheck size={12} /> {user.role === 'official' ? '官方' : '管理员'}
               </span>
             )}
           </div>
@@ -73,7 +73,7 @@ export default function MinePage() {
         <MenuRow icon={ScrollText} label="隐私条款和用户协议" onClick={(e) => launch(e, '/privacy')} />
       </MenuList>
 
-      {user?.role === 'admin' && (
+      {['admin','official'].includes(user?.role) && (
         <MenuList className="mb-2 animate-fadeInUp">
           <MenuRow icon={ShieldCheck} label="管理后台" onClick={(e) => launch(e, '/admin')} />
         </MenuList>

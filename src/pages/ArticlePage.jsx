@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTransition } from '../context/TransitionContext';
 import api from '../lib/api';
 import Loading from '../components/Loading';
-import { Calendar, Eye, Tag, User, Send, Trash2, Edit3, Pin, PinOff } from 'lucide-react';
+import { Calendar, Eye, Tag, User, Send, Trash2, Edit3, Pin, PinOff, ArrowLeft } from 'lucide-react';
 import { prepareArticleContent } from '../lib/markdown.js';
 
 // 外部链接重定向基础 URL（必须与 markdown.js 中的 LINK_BASE_URL 保持一致）。
@@ -17,6 +18,7 @@ const LINK_BASE = 'https://skyxing.dpdns.org';
 export default function ArticlePage() {
   const { id } = useParams();
   const { user } = useAuth();
+  const { goBack } = useTransition();
   const navigate = useNavigate();
   const [article, setArticle] = useState(null);
   const [comments, setComments] = useState([]);
@@ -90,13 +92,19 @@ export default function ArticlePage() {
   if (loading) return <Loading />;
   if (!article) return <div className="text-center py-12"><p className="text-gray-500">文章不存在</p><Link to="/" className="btn-primary mt-3 inline-block">返回首页</Link></div>;
 
-  const isOwner = user && (user.id === article.authorId || user.role === 'admin');
+  const isOwner = user && (user.id === article.authorId || ['admin','official'].includes(user.role));
   const isArticleAuthor = user && user.id === article.authorId;
   const topComments = comments.filter(c => !c.parentId);
   const getReplies = (cid) => comments.filter(c => c.parentId === cid);
 
   return (
     <div className="max-w-3xl mx-auto">
+      <button
+        onClick={goBack}
+        className="mb-3 inline-flex items-center gap-1.5 h-9 px-2 -ml-2 rounded-lg text-gray-500 hover:bg-gray-100 active:bg-gray-200 transition-colors outline-none"
+      >
+        <ArrowLeft size={18} /> 返回
+      </button>
       <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">{article.title}</h1>
       <div className="flex items-center gap-3 text-xs text-gray-400 flex-wrap mb-2">
         {article.author && <Link to={`/user/${article.author.id}`} className="flex items-center gap-1 text-primary-600"><User size={12}/>{article.author.displayName}</Link>}
@@ -106,7 +114,7 @@ export default function ArticlePage() {
       </div>
       {isOwner && <div className="flex gap-2 mb-4 flex-wrap">
         <Link to={`/edit/${article.id}`} className="btn-outline btn-sm"><Edit3 size={13} className="mr-1"/>编辑</Link>
-        {user?.role === 'admin' && (
+        {['admin','official'].includes(user?.role) && (
           <button onClick={handlePinArticle} className="btn-outline btn-sm">
             {article.pinned ? <PinOff size={13} className="mr-1"/> : <Pin size={13} className="mr-1"/>}
             {article.pinned ? '取消置顶' : '置顶'}
@@ -135,7 +143,7 @@ export default function ArticlePage() {
 }
 
 function CommentItem({ comment, replies, currentUser, onReply, onDelete, onPin, isArticleAuthor, formatDate }) {
-  const canDelete = currentUser && (currentUser.id === comment.userId || currentUser.role === 'admin');
+  const canDelete = currentUser && (currentUser.id === comment.userId || ['admin','official'].includes(currentUser.role));
   return (
     <div className={'border-l-2 pl-3 ' + (comment.pinned ? 'border-primary-300 bg-primary-50/30 -ml-2 pl-5 pr-2 py-1.5 rounded-r-lg' : 'border-gray-100')}>
       <div className="flex gap-2">

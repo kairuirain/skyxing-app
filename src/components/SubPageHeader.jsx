@@ -1,15 +1,15 @@
-import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { useTransition } from '../context/TransitionContext';
 
 // 子页面统一头部：返回按钮 + 标题（可选副标题/右侧操作）
 export default function SubPageHeader({ title, subtitle, onBack, right }) {
-  const navigate = useNavigate();
-  const goBack = onBack || (() => navigate(-1));
+  const { goBack } = useTransition();
+  const handleBack = onBack || goBack;
 
   return (
     <div className="sticky top-0 z-30 bg-[var(--win-bg)]/90 backdrop-blur border-b border-[var(--win-border)] px-3 h-14 flex items-center gap-1 animate-fadeIn">
       <button
-        onClick={goBack}
+        onClick={handleBack}
         className="w-9 h-9 -ml-1.5 rounded-full flex items-center justify-center text-[var(--win-text-secondary)] hover:bg-[var(--win-pane-hover)] active:bg-[var(--win-pane-pressed)] transition-colors outline-none"
         aria-label="返回"
       >
