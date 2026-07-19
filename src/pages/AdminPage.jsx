@@ -6,7 +6,7 @@ import Loading from '../components/Loading';
 import { Users, FileText, MessageSquare, Eye, Trash2, ArrowUp, ArrowDown, GripVertical } from 'lucide-react';
 
 export default function AdminPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [usersList, setUsersList] = useState([]);
@@ -18,9 +18,10 @@ export default function AdminPage() {
   const [editingWeight, setEditingWeight] = useState(null);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user || !['admin', 'official'].includes(user.role)) { navigate('/'); return; }
     loadData();
-  }, [user, navigate, sortBy, sortOrder]);
+  }, [user, authLoading, navigate]);
 
   const loadData = async () => {
     try {
