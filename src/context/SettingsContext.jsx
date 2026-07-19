@@ -73,7 +73,7 @@ export function SettingsProvider({ children }) {
 
   return (
     <SettingsContext.Provider
-      value={{ theme, terminalOpen, debugMode, updateChannel, setUpdateChannel, logs, toggleTheme, toggleTerminal, toggleDebug, clearLogs }}
+      value={{ theme, setTheme, terminalOpen, debugMode, updateChannel, setUpdateChannel, logs, toggleTheme, toggleTerminal, toggleDebug, clearLogs }}
     >
       {children}
     </SettingsContext.Provider>

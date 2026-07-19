@@ -5,20 +5,27 @@ import App from './App';
 import { AuthProvider } from './context/AuthContext';
 import { SettingsProvider } from './context/SettingsContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import GlobalErrorModal from './components/GlobalErrorModal';
+import { reportError } from './lib/errorStore';
 import './index.css';
 
 console.log('[SKYXING] Frontend initializing...');
 console.log('[SKYXING] User Agent:', navigator.userAgent);
 console.log('[SKYXING] Window size:', window.innerWidth, 'x', window.innerHeight);
 
-// 捕获全局未处理的 Promise 拒绝
-window.addEventListener('unhandledrejection', (event) => {
-  console.error('[SKYXING] Unhandled Promise rejection:', event.reason);
+// 捕获全局未处理的 JS 错误（仅脚本错误，排除资源加载错误）
+window.addEventListener('error', (event) => {
+  if (event.error) {
+    console.error('[SKYXING] Global error:', event.error);
+    reportError(event.error);
+  }
 });
 
-// 捕获全局 JS 错误
-window.addEventListener('error', (event) => {
-  console.error('[SKYXING] Global error:', event.message, 'at', event.filename, ':', event.lineno);
+// 捕获全局未处理的 Promise 拒绝
+window.addEventListener('unhandledrejection', (event) => {
+  const reason = event.reason;
+  console.error('[SKYXING] Unhandled Promise rejection:', reason);
+  reportError(reason instanceof Error ? reason : new Error(String(reason)));
 });
 
 const rootElement = document.getElementById('root');
@@ -37,6 +44,7 @@ if (!rootElement) {
             <BrowserRouter>
               <AuthProvider>
                 <App />
+                <GlobalErrorModal />
               </AuthProvider>
             </BrowserRouter>
           </SettingsProvider>

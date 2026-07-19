@@ -10,6 +10,11 @@ import UserPage from './pages/UserPage';
 import AdminPage from './pages/AdminPage';
 import PodcastPage from './pages/PodcastPage';
 import MinePage from './pages/MinePage';
+import AccountSecurityPage from './pages/AccountSecurityPage';
+import AccountInfoPage from './pages/AccountInfoPage';
+import SettingsPage from './pages/SettingsPage';
+import PrivacyPage from './pages/PrivacyPage';
+import NotificationsPage from './pages/NotificationsPage';
 import MessagesPage from './pages/MessagesPage';
 import ConversationPage from './pages/ConversationPage';
 import LinkRedirect from './pages/LinkRedirect';
@@ -20,8 +25,13 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
-        <Route path="/podcast" element={<PodcastPage />} />
-        <Route path="/mine" element={<MinePage />} />
+      <Route path="/podcast" element={<PodcastPage />} />
+      <Route path="/mine" element={<MinePage />} />
+      <Route path="/account/security" element={<AccountSecurityPage />} />
+      <Route path="/account/info" element={<AccountInfoPage />} />
+      <Route path="/settings" element={<SettingsPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/article/:id" element={<ArticlePage />} />

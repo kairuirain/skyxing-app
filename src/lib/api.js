@@ -170,6 +170,37 @@ class ApiClient {
     });
   }
 
+  // Account
+  async changePassword(currentPassword, newPassword) {
+    return this.request('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+  }
+
+  async deleteAccount() {
+    return this.request('/users/me', {
+      method: 'DELETE',
+    });
+  }
+
+  // Notifications
+  async getNotifications() {
+    return this.request('/notifications');
+  }
+
+  async markNotificationRead(id) {
+    return this.request(`/notifications/${id}/read`, {
+      method: 'PUT',
+    });
+  }
+
+  async markAllNotificationsRead() {
+    return this.request('/notifications/read-all', {
+      method: 'PUT',
+    });
+  }
+
   // Admin
   async getStats() {
     return this.request('/admin/stats');
