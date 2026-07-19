@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTransition } from '../context/TransitionContext';
 import api from '../lib/api';
 import Loading from '../components/Loading';
-import { Calendar, Eye, Tag, User, Send, Trash2, Edit3, Pin, PinOff, ArrowLeft } from 'lucide-react';
+import { Calendar, Eye, Tag, User, Send, Trash2, Edit3, Pin, PinOff } from 'lucide-react';
 import { prepareArticleContent } from '../lib/markdown.js';
 
 // 外部链接重定向基础 URL（必须与 markdown.js 中的 LINK_BASE_URL 保持一致）。
@@ -103,7 +103,7 @@ export default function ArticlePage() {
         onClick={goBack}
         className="mb-3 inline-flex items-center gap-1.5 h-9 px-2 -ml-2 rounded-lg text-gray-500 hover:bg-gray-100 active:bg-gray-200 transition-colors outline-none"
       >
-        <ArrowLeft size={18} /> 返回
+        ← 返回
       </button>
       <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">{article.title}</h1>
       <div className="flex items-center gap-3 text-xs text-gray-400 flex-wrap mb-2">

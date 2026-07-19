@@ -18,7 +18,7 @@ export default function AdminPage() {
   const [editingWeight, setEditingWeight] = useState(null);
 
   useEffect(() => {
-    if (!user || user.role !== 'admin') { navigate('/'); return; }
+    if (!user || !['admin', 'official'].includes(user.role)) { navigate('/'); return; }
     loadData();
   }, [user, navigate, sortBy, sortOrder]);
 
