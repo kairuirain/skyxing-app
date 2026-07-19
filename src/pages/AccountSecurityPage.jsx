@@ -8,7 +8,8 @@ import { KeyRound, ShieldCheck, Fingerprint, Trash2, AlertTriangle, Copy, Check 
 export default function AccountSecurityPage() {
   const { user, logout, refreshUser } = useAuth();
   const navigate = useNavigate();
-  const [totpEnabled, setTotpEnabled] = useState(user?.totpEnabled || false);
+  // 实时派生 totpEnabled 状态（跟随 AuthContext 中 user 对象变化）
+  const totpEnabled = !!user?.totpEnabled;
 
   // 进入页面时强制刷新一次 user，确保 totpEnabled 是最新
   useEffect(() => { refreshUser(); }, []);
@@ -66,8 +67,7 @@ export default function AccountSecurityPage() {
     setSetupLoading(true); setSetupError('');
     try {
       const res = await api.verifySetup2FA(setupData.secret, verifyCode);
-      await refreshUser(); // 同步 AuthContext 中的 user
-      setTotpEnabled(true);
+      await refreshUser(); // 同步 AuthContext 中的 user（totpEnabled 自动反映到 UI）
       setSetupData(null);
       setVerifyCode('');
     } catch (err) {
@@ -82,7 +82,6 @@ export default function AccountSecurityPage() {
     try {
       await api.disable2FA();
       await refreshUser();
-      setTotpEnabled(false);
     } catch (err) {
       window.alert(err.message);
     } finally { setSetupLoading(false); }
