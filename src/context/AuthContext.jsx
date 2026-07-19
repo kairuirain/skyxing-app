@@ -10,30 +10,36 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const token = localStorage.getItem('skyxing_token');
     if (token) {
-      console.log('[Auth] Token found, verifying...');
       api.setToken(token);
       api.getMe()
-        .then(data => {
-          console.log('[Auth] User verified:', data.user?.displayName);
-          setUser(data.user);
-        })
-        .catch((err) => {
-          console.warn('[Auth] Token verification failed:', err.message);
-          api.setToken(null);
-          setUser(null);
-        })
-        .finally(() => {
-          console.log('[Auth] Auth check completed');
-          setLoading(false);
-        });
-    } else {
-      console.log('[Auth] No token, user is guest');
-      setLoading(false);
+        .then(data => setUser(data.user))
+        .catch(() => { api.setToken(null); setUser(null); })
+        .finally(() => setLoading(false));
+    } else { setLoading(false); }
+  }, []);
+
+  // 重新拉取最新用户信息（开启/关闭 2FA 等需要同步 user.totpEnabled 时调用）
+  const refreshUser = useCallback(async () => {
+    try {
+      const data = await api.getMe();
+      setUser(data.user);
+      return data.user;
+    } catch (e) {
+      console.warn('[Auth] refreshUser failed:', e.message);
+      return null;
     }
   }, []);
 
   const login = useCallback(async (username, password) => {
     const data = await api.login({ username, password });
+    if (data.requireTotp) return data;
+    api.setToken(data.token);
+    setUser(data.user);
+    return data;
+  }, []);
+
+  const complete2FALogin = useCallback(async (tempToken, code) => {
+    const data = await api.verify2FALogin(tempToken, code);
     api.setToken(data.token);
     setUser(data.user);
     return data;
@@ -59,7 +65,7 @@ export function AuthProvider({ children }) {
   }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, loading, login, complete2FALogin, register, logout, updateProfile, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
@@ -67,8 +73,6 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthContext');
-  }
+  if (!context) throw new Error('useAuth must be used within AuthContext');
   return context;
 }

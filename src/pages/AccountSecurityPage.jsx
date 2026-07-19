@@ -6,9 +6,12 @@ import SubPageHeader from '../components/SubPageHeader';
 import { KeyRound, ShieldCheck, Fingerprint, Trash2, AlertTriangle, Copy, Check } from 'lucide-react';
 
 export default function AccountSecurityPage() {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [totpEnabled, setTotpEnabled] = useState(user?.totpEnabled || false);
+
+  // 进入页面时强制刷新一次 user，确保 totpEnabled 是最新
+  useEffect(() => { refreshUser(); }, []);
 
   // 密码修改
   const [form, setForm] = useState({ current: '', next: '', confirm: '' });
@@ -63,6 +66,7 @@ export default function AccountSecurityPage() {
     setSetupLoading(true); setSetupError('');
     try {
       const res = await api.verifySetup2FA(setupData.secret, verifyCode);
+      await refreshUser(); // 同步 AuthContext 中的 user
       setTotpEnabled(true);
       setSetupData(null);
       setVerifyCode('');
@@ -77,6 +81,7 @@ export default function AccountSecurityPage() {
     setSetupLoading(true);
     try {
       await api.disable2FA();
+      await refreshUser();
       setTotpEnabled(false);
     } catch (err) {
       window.alert(err.message);
