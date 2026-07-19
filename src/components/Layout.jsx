@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { Home, Podcast, User, LogOut, PenSquare, Terminal, Palette, Bug, MessageSquare, RefreshCw } from 'lucide-react';
 import { isAndroid } from '../lib/platform';
 import api from '../lib/api';
+import AnimatedOutlet from './AnimatedOutlet';
 
 const NAV_ITEMS = [
   { to: '/', label: '主页', icon: Home, end: true },
@@ -230,7 +231,7 @@ function DesktopLayout({ unread = 0 }) {
           <RefreshCw size={15} />
         </button>
         <div className="flex-1 overflow-y-auto win-scroll">
-          <Outlet />
+          <AnimatedOutlet />
         </div>
         {terminalOpen && (
           <TerminalPanel logs={logs} onClose={toggleTerminal} onClear={clearLogs} />
@@ -299,7 +300,7 @@ function AndroidLayout({ unread = 0 }) {
         >
           <RefreshCw size={15} />
         </button>
-        <Outlet />
+        <AnimatedOutlet />
       </main>
 
       {/* 终端日志面板：以底部抽屉形式覆盖，调试时临时显示 */}

@@ -47,7 +47,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-full flex flex-col animate-fadeIn">
+    <div className="min-h-full flex flex-col">
       <SubPageHeader title="设置" subtitle="个性化 · 更新 · 反馈 · 关于" />
 
       <div className="flex-1 overflow-y-auto win-scroll px-4 py-4 space-y-1">

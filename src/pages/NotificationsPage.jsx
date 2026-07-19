@@ -49,7 +49,7 @@ export default function NotificationsPage() {
 
   if (!user) {
     return (
-      <div className="min-h-full flex flex-col animate-fadeIn">
+      <div className="min-h-full flex flex-col">
         <SubPageHeader title="消息通知" />
         <div className="flex-1 flex items-center justify-center text-[var(--win-text-tertiary)] text-sm">请先登录后查看通知</div>
       </div>
@@ -57,7 +57,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="min-h-full flex flex-col animate-fadeIn">
+    <div className="min-h-full flex flex-col">
       <SubPageHeader
         title="消息通知"
         subtitle={unread > 0 ? `${unread} 条未读` : '全部已读'}

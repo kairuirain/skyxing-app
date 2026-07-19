@@ -50,7 +50,7 @@ export default function PrivacyPage() {
   ];
 
   return (
-    <div className="min-h-full flex flex-col animate-fadeIn">
+    <div className="min-h-full flex flex-col">
       <SubPageHeader title="隐私条款和用户协议" />
 
       <div className="px-4 pt-3">

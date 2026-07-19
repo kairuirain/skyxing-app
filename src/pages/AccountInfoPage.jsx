@@ -40,7 +40,7 @@ export default function AccountInfoPage() {
   };
 
   return (
-    <div className="min-h-full flex flex-col animate-fadeIn">
+    <div className="min-h-full flex flex-col">
       <SubPageHeader title="账号信息" subtitle="管理你的公开资料" />
 
       <form onSubmit={save} className="flex-1 overflow-y-auto win-scroll px-4 py-4 space-y-5 animate-fadeInUp">

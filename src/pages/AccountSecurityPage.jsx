@@ -47,7 +47,7 @@ export default function AccountSecurityPage() {
   };
 
   return (
-    <div className="min-h-full flex flex-col animate-fadeIn">
+    <div className="min-h-full flex flex-col">
       <SubPageHeader title="账号安全" subtitle="管理你的登录与账户安全" />
 
       <div className="flex-1 overflow-y-auto win-scroll px-4 py-4 space-y-5">
