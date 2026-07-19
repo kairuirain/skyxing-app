@@ -8,6 +8,19 @@ const CONTENT_URLS = {
   terms: 'https://skyxing.dpdns.org/terms.html',
 };
 
+const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+
+// 跨域抓取 HTML：Tauri 端使用原生 HTTP 插件绕过浏览器 CORS，Web 端用普通 fetch
+async function fetchText(url) {
+  if (isTauri) {
+    const { fetch: tauriFetch } = await import('@tauri-apps/plugin-http');
+    const resp = await tauriFetch(url);
+    return resp.text();
+  }
+  const resp = await fetch(url);
+  return resp.text();
+}
+
 /** 从协议 HTML 页面中提取纯文本内容（保持与 app 现有样式一致） */
 function extractText(html) {
   try {
@@ -23,7 +36,6 @@ function extractText(html) {
     }
     return parts.join('\n\n');
   } catch {
-    // 降级：直接返回文字
     const body = html.replace(/<[^>]*>/g, '').replace(/\n{3,}/g, '\n\n').trim();
     return body || '加载失败';
   }
@@ -37,8 +49,7 @@ export default function PrivacyPage() {
   useEffect(() => {
     setLoading(true);
     setContent('');
-    fetch(CONTENT_URLS[tab])
-      .then(r => r.text())
+    fetchText(CONTENT_URLS[tab])
       .then(html => setContent(extractText(html)))
       .catch(() => setContent('加载失败，请稍后重试'))
       .finally(() => setLoading(false));
