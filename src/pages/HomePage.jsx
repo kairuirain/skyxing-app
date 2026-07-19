@@ -23,8 +23,11 @@ export default function HomePage() {
   const [unread, setUnread] = useState(0);
   const [notices, setNotices] = useState([]);
 
-  // 函数声明必须放在 hooks 之前，避免 const TDZ
-  const loadArticles = async () => {
+  // 用 useCallback 稳定函数身份：否则 loadArticles 每次渲染都换新引用，
+  // 导致 useSync 的 effect 每次渲染都重跑并立即调用 checkVersion；
+  // 而后端 /state/version 是每秒变化的秒级时间戳，会被判定为“数据已变”
+  // 从而不断触发 onRefresh → 无限重渲染 + 持续刷新（主页崩溃）。
+  const loadArticles = useCallback(async () => {
     setLoading(true);
     try {
       const params = { page, limit: 10 };
@@ -35,13 +38,13 @@ export default function HomePage() {
       setPagination(data.pagination);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
-  };
+  }, [page, selectedTag, search]);
 
-  const loadTags = async () => {
+  const loadTags = useCallback(async () => {
     try { const data = await api.getTags(); setTags(data.tags || []); } catch (e) {}
-  };
+  }, []);
 
-  useEffect(() => { loadArticles(); loadTags(); }, [page, selectedTag]);
+  useEffect(() => { loadArticles(); loadTags(); }, [loadArticles, loadTags]);
   useSync(loadArticles, { enabled: !selectedTag && !search });
 
   useEffect(() => {
