@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSettings } from '../context/SettingsContext';
-import { isAndroid } from '../lib/platform';
+import { isAndroid, isWindows } from '../lib/platform';
 import api from '../lib/api';
 import SubPageHeader from '../components/SubPageHeader';
 import { Palette, Download, MessageSquare, Info, RefreshCw, Sun, Moon, ExternalLink, Check } from 'lucide-react';
@@ -11,7 +11,9 @@ const ISSUES_URL = 'https://github.com/kairuirain/skyxing-app/issues/new';
 const REPO_URL = 'https://github.com/kairuirain/skyxing-app';
 
 function getPlatform() {
-  return isAndroid() ? 'android' : 'app';
+  if (isAndroid()) return 'android';
+  if (isWindows()) return 'windows';
+  return 'app'; // macOS / Linux / 其他桌面
 }
 
 function SectionTitle({ icon: Icon, children, desc }) {

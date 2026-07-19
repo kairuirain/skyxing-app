@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
+import SlideOutlet from './components/SlideOutlet';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -23,15 +24,11 @@ import NotFoundPage from './pages/NotFoundPage';
 export default function App() {
   return (
     <Routes>
+      {/* 主内容框架（含侧边栏导航） */}
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
-      <Route path="/podcast" element={<PodcastPage />} />
-      <Route path="/mine" element={<MinePage />} />
-      <Route path="/account/security" element={<AccountSecurityPage />} />
-      <Route path="/account/info" element={<AccountInfoPage />} />
-      <Route path="/settings" element={<SettingsPage />} />
-      <Route path="/privacy" element={<PrivacyPage />} />
-      <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/podcast" element={<PodcastPage />} />
+        <Route path="/mine" element={<MinePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/article/:id" element={<ArticlePage />} />
@@ -40,9 +37,18 @@ export default function App() {
         <Route path="/user/:id" element={<UserPage />} />
         <Route path="/messages" element={<MessagesPage />} />
         <Route path="/messages/:convId" element={<ConversationPage />} />
-        <Route path="/admin" element={<AdminPage />} />
         <Route path="/link" element={<LinkRedirect />} />
         <Route path="*" element={<NotFoundPage />} />
+      </Route>
+
+      {/* 二级菜单（全屏滑入，覆盖导航栏） */}
+      <Route element={<SlideOutlet />}>
+        <Route path="/account/security" element={<AccountSecurityPage />} />
+        <Route path="/account/info" element={<AccountInfoPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Route>
     </Routes>
   );

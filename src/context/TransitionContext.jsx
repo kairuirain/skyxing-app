@@ -10,8 +10,10 @@ export function TransitionProvider({ children }) {
   const [overlay, setOverlay] = useState(null);
   const originRectRef = useRef(null);
   const outletElRef = useRef(null);
+  const slidePageElRef = useRef(null);
 
   const registerOutlet = useCallback((el) => { outletElRef.current = el; }, []);
+  const registerSlidePage = useCallback((el) => { slidePageElRef.current = el; }, []);
 
   // 按钮触发：从按钮位置生成渐变遮罩，放大铺满全屏后跳转目标页
   const launch = useCallback((event, to) => {
@@ -30,15 +32,27 @@ export function TransitionProvider({ children }) {
     [navigate]
   );
 
-  // 返回：当前页面缩回原按钮位置
+  // 二级菜单返回：从右侧滑出
+  const slideBack = useCallback(() => {
+    const el = slidePageElRef.current;
+    if (el) {
+      el.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
+      el.style.transform = 'translateX(100%)';
+      setTimeout(() => navigate(-1), 260);
+    } else {
+      navigate(-1);
+    }
+  }, [navigate]);
+
+  // 普通返回：缩回原按钮位置（若当前在 SlideOutlet 中则滑出返回）
   const goBack = useCallback(() => {
+    if (slidePageElRef.current) { slideBack(); return; }
     const el = outletElRef.current;
     const origin = originRectRef.current;
     if (el && origin) {
       const r = el.getBoundingClientRect();
       const ix = origin.x + origin.w / 2;
       const iy = origin.y + origin.h / 2;
-      // 临时关闭父容器溢出裁剪（小米式缩回）
       const scrollParent = el.closest('.win-scroll') || el.parentElement?.closest('[class*="overflow"]');
       if (scrollParent) scrollParent.style.overflow = 'visible';
       el.style.transformOrigin = `${ix - r.left}px ${iy - r.top}px`;
@@ -63,33 +77,27 @@ export function TransitionProvider({ children }) {
   }, [navigate]);
 
   return (
-    <TransitionContext.Provider value={{ launch, go, goBack, registerOutlet }}>
+    <TransitionContext.Provider value={{ launch, go, goBack, slideBack, registerOutlet, registerSlidePage }}>
       {children}
       <TransitionOverlay overlay={overlay} onDone={() => setOverlay(null)} navigate={navigate} />
     </TransitionContext.Provider>
   );
 }
 
-// 进入：圆角矩形从按钮位置放大至铺满全屏
 function TransitionOverlay({ overlay, onDone, navigate }) {
   const ref = useRef(null);
-
   useEffect(() => {
     if (!overlay || !ref.current) return;
     const el = ref.current;
     const { rect, to } = overlay;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    const scale = Math.max(vw / rect.width, vh / rect.height); // 恰好覆盖
-
+    const scale = Math.max(vw / rect.width, vh / rect.height);
     el.style.left = rect.left + 'px';
     el.style.top = rect.top + 'px';
     el.style.width = rect.width + 'px';
     el.style.height = rect.height + 'px';
-
-    // 先执行一次回流使初始样式生效
     void el.offsetWidth;
-
     const anim = el.animate(
       [
         { transform: 'scale(1)', borderRadius: '12px', opacity: 1 },
@@ -97,18 +105,14 @@ function TransitionOverlay({ overlay, onDone, navigate }) {
       ],
       { duration: 320, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
     );
-
     anim.onfinish = () => {
       navigate(to, { state: { __noPageAnim: true } });
       setTimeout(() => {
-        const fade = el.animate([{ opacity: 1 }, { opacity: 0 }], {
-          duration: 150, easing: 'ease-out', fill: 'forwards',
-        });
+        const fade = el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: 'ease-out', fill: 'forwards' });
         fade.onfinish = () => onDone();
       }, 60);
     };
   }, [overlay, navigate, onDone]);
-
   if (!overlay) return null;
   return (
     <div

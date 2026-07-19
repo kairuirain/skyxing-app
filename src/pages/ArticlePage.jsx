@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTransition } from '../context/TransitionContext';
 import api from '../lib/api';
 import Loading from '../components/Loading';
+import Avatar from '../components/Avatar';
 import { Calendar, Eye, Tag, User, Send, Trash2, Edit3, Pin, PinOff } from 'lucide-react';
 import { prepareArticleContent } from '../lib/markdown.js';
 
@@ -125,7 +126,7 @@ export default function ArticlePage() {
       {article.coverImage && <img src={article.coverImage} alt="" className="w-full rounded-lg mb-5 max-h-80 object-cover"/>}
       <div className="article-content mb-8" dangerouslySetInnerHTML={{__html:prepareArticleContent(article.content)}}/>
 
-      {article.author && <div className="card p-4 mb-6 flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold">{article.author.displayName?.[0]}</div><div><Link to={`/user/${article.author.id}`} className="font-semibold text-sm hover:text-primary-600">{article.author.displayName}</Link>{article.author.bio&&<p className="text-xs text-gray-500">{article.author.bio}</p>}</div></div>}
+      {article.author && <div className="card p-4 mb-6 flex items-center gap-3"><Avatar src={article.author.avatar} name={article.author.displayName} className="w-10 h-10 rounded-full text-sm" /><div><Link to={`/user/${article.author.id}`} className="font-semibold text-sm hover:text-primary-600">{article.author.displayName}</Link>{article.author.bio&&<p className="text-xs text-gray-500">{article.author.bio}</p>}</div></div>}
 
       <div className="border-t pt-5">
         <h3 className="font-bold mb-4">评论 ({comments.length})</h3>
@@ -147,7 +148,7 @@ function CommentItem({ comment, replies, currentUser, onReply, onDelete, onPin, 
   return (
     <div className={'border-l-2 pl-3 ' + (comment.pinned ? 'border-primary-300 bg-primary-50/30 -ml-2 pl-5 pr-2 py-1.5 rounded-r-lg' : 'border-gray-100')}>
       <div className="flex gap-2">
-        <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold flex-shrink-0">{comment.user?.displayName?.[0]}</div>
+        <Avatar src={comment.user?.avatar} name={comment.user?.displayName} className="w-7 h-7 rounded-full text-xs" initialClass="bg-gray-200 text-gray-500" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
             <span className="font-medium text-xs">{comment.user?.displayName}</span>

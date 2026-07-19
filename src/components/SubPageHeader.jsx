@@ -1,10 +1,16 @@
 import { ArrowLeft } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { useTransition } from '../context/TransitionContext';
 
-// 子页面统一头部：返回按钮 + 标题（可选副标题/右侧操作）
+// 二级菜单路由路径前缀（使用 SlideOutlet 全屏滑入）
+const SLIDE_ROUTES = ['/account/', '/settings', '/privacy', '/notifications', '/admin'];
+
+// 子页面统一头部：返回按钮 + 标题
 export default function SubPageHeader({ title, subtitle, onBack, right }) {
-  const { goBack } = useTransition();
-  const handleBack = onBack || goBack;
+  const { goBack, slideBack } = useTransition();
+  const location = useLocation();
+  const isSlide = SLIDE_ROUTES.some(p => location.pathname.startsWith(p));
+  const handleBack = onBack || (isSlide ? slideBack : goBack);
 
   return (
     <div className="sticky top-0 z-30 bg-[var(--win-bg)]/90 backdrop-blur border-b border-[var(--win-border)] px-3 h-14 flex items-center gap-1 animate-fadeIn">

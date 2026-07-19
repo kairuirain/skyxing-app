@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import SubPageHeader from '../components/SubPageHeader';
-import { IdCard, Mail, Check } from 'lucide-react';
+import Avatar from '../components/Avatar';
+import { fileToAvatarDataUrl } from '../lib/avatar';
+import { IdCard, Mail, Check, ImagePlus } from 'lucide-react';
 
 export default function AccountInfoPage() {
   const { user, updateProfile } = useAuth();
@@ -19,6 +21,19 @@ export default function AccountInfoPage() {
   const onChange = (e) => {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
     setError(''); setSuccess('');
+  };
+
+  const handleAvatarFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) { setError('图片过大，请选择 3MB 以内的图片'); return; }
+    setError(''); setSuccess('');
+    try {
+      const dataUrl = await fileToAvatarDataUrl(file);
+      setForm((f) => ({ ...f, avatar: dataUrl }));
+    } catch (err) {
+      setError(err.message || '图片处理失败');
+    }
   };
 
   const save = async (e) => {
@@ -44,20 +59,22 @@ export default function AccountInfoPage() {
       <SubPageHeader title="账号信息" subtitle="管理你的公开资料" />
 
       <form onSubmit={save} className="flex-1 overflow-y-auto win-scroll px-4 py-4 space-y-5 animate-fadeInUp">
-        {/* 头像预览 */}
+        {/* 头像预览与上传 */}
         <div className="flex items-center gap-4 bg-[var(--win-card)] border border-[var(--win-border)] rounded-2xl p-5">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#fb7299] to-[#00a1d6] text-white text-2xl font-bold flex items-center justify-center shadow-md shrink-0 overflow-hidden">
-            {form.avatar ? (
-              <img src={form.avatar} alt="" className="w-full h-full object-cover" />
-            ) : (
-              (form.displayName || user.username || '?').charAt(0).toUpperCase()
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <label className="text-[13px] font-medium text-[var(--win-text)]">头像链接</label>
+          <Avatar src={form.avatar} name={form.displayName || user.username} className="w-16 h-16 rounded-2xl text-2xl shadow-md" />
+          <div className="flex-1 min-w-0 space-y-2">
+            <div className="flex items-center gap-2">
+              <label className="btn-outline btn-sm inline-flex items-center gap-1.5 cursor-pointer">
+                <ImagePlus size={14} /> 上传头像
+                <input type="file" accept="image/*" className="hidden" onChange={handleAvatarFile} />
+              </label>
+              {form.avatar && (
+                <button type="button" onClick={() => setForm((f) => ({ ...f, avatar: '' }))} className="text-[12px] text-red-500 hover:underline">移除</button>
+              )}
+            </div>
             <input
               name="avatar" value={form.avatar} onChange={onChange}
-              placeholder="https://... 图片 URL（可选）" className="input mt-1.5"
+              placeholder="或直接粘贴图片 URL（可选）" className="input mt-1.5"
             />
           </div>
         </div>

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTransition } from '../context/TransitionContext';
 import { isAndroid } from '../lib/platform';
+import Avatar from '../components/Avatar';
 import {
   Shield, IdCard, Settings as SettingsIcon, ScrollText, User as UserIcon,
   FileText, LogOut, ShieldCheck, LogIn, Bell,
@@ -32,16 +33,13 @@ export default function MinePage() {
   }
 
   const handleLogout = () => { logout(); navigate('/'); };
-  const initial = (user?.displayName || user?.username || '?').charAt(0).toUpperCase();
 
   return (
     <div className="min-h-full px-4 py-5">
       {/* 用户信息显示 */}
       <div className="bg-[var(--win-card)] border border-[var(--win-border)] rounded-2xl p-5 mb-5 animate-fadeInUp">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#fb7299] to-[#00a1d6] text-white text-2xl font-bold flex items-center justify-center shadow-md shrink-0">
-            {initial}
-          </div>
+          <Avatar src={user.avatar} name={user.displayName || user.username} className="w-16 h-16 rounded-2xl text-2xl shadow-md" />
           <div className="flex-1 min-w-0">
             <h1 className="text-[18px] font-bold text-[var(--win-text)] truncate">{user?.displayName || user?.username}</h1>
             <p className="text-[13px] text-[var(--win-text-tertiary)] truncate">@{user?.username}</p>
@@ -59,23 +57,23 @@ export default function MinePage() {
 
       <MenuSectionTitle>账号</MenuSectionTitle>
       <MenuList className="mb-2 animate-fadeInUp">
-        <MenuRow icon={Shield} label="账号安全" desc="密码 · 2FA · 注销账号" onClick={(e) => launch(e, '/account/security')} />
+        <MenuRow icon={Shield} label="账号安全" desc="密码 · 2FA · 注销账号" onClick={() => navigate('/account/security')} />
         <MenuDivider />
-        <MenuRow icon={IdCard} label="账号信息" desc="昵称 · 简介 · 头像" onClick={(e) => launch(e, '/account/info')} />
+        <MenuRow icon={IdCard} label="账号信息" desc="昵称 · 简介 · 头像" onClick={() => navigate('/account/info')} />
       </MenuList>
 
       <MenuSectionTitle>通用</MenuSectionTitle>
       <MenuList className="mb-2 animate-fadeInUp">
-        <MenuRow icon={Bell} label="消息通知" desc="系统消息与互动提醒" onClick={(e) => launch(e, '/notifications')} />
+        <MenuRow icon={Bell} label="消息通知" desc="系统消息与互动提醒" onClick={() => navigate('/notifications')} />
         <MenuDivider />
-        <MenuRow icon={SettingsIcon} label="设置" desc="个性化 · 更新 · 反馈 · 关于" onClick={(e) => launch(e, '/settings')} />
+        <MenuRow icon={SettingsIcon} label="设置" desc="个性化 · 更新 · 反馈 · 关于" onClick={() => navigate('/settings')} />
         <MenuDivider />
-        <MenuRow icon={ScrollText} label="隐私条款和用户协议" onClick={(e) => launch(e, '/privacy')} />
+        <MenuRow icon={ScrollText} label="隐私条款和用户协议" onClick={() => navigate('/privacy')} />
       </MenuList>
 
       {['admin','official'].includes(user?.role) && (
         <MenuList className="mb-2 animate-fadeInUp">
-          <MenuRow icon={ShieldCheck} label="管理后台" onClick={(e) => launch(e, '/admin')} />
+          <MenuRow icon={ShieldCheck} label="管理后台" onClick={() => navigate('/admin')} />
         </MenuList>
       )}
 

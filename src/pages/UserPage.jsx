@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
 import Loading from '../components/Loading';
+import Avatar from '../components/Avatar';
 import { Calendar, Edit3, FileText } from 'lucide-react';
 
 export default function UserPage() {
@@ -43,7 +44,7 @@ export default function UserPage() {
     <div className="max-w-2xl mx-auto">
       <div className="card p-5 mb-5">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold text-xl">{profile.displayName?.[0]}</div>
+          <Avatar src={profile.avatar} name={profile.displayName} className="w-16 h-16 rounded-full text-xl" />
           <div className="flex-1">
             <h1 className="text-lg font-bold">{profile.displayName}</h1>
             <p className="text-sm text-gray-500">@{profile.username}</p>
