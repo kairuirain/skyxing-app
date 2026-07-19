@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
+import Loading from '../components/Loading';
 import SubPageHeader from '../components/SubPageHeader';
 import { Bell, MessageSquare, UserPlus, CheckCheck } from 'lucide-react';
 
@@ -75,11 +76,7 @@ export default function NotificationsPage() {
 
       <div className="flex-1 overflow-y-auto win-scroll px-4 py-4 space-y-2">
         {loading ? (
-          <div className="space-y-2 animate-pulse">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="h-16 bg-[var(--win-pane)] rounded-xl" />
-            ))}
-          </div>
+          <Loading />
         ) : list.length === 0 ? (
           <div className="text-center py-16 text-[var(--win-text-tertiary)]">
             <Bell size={40} className="mx-auto mb-3 opacity-40" />

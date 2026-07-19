@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
 import { SettingsProvider } from './context/SettingsContext';
+import { TransitionProvider } from './context/TransitionContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import GlobalErrorModal from './components/GlobalErrorModal';
 import { reportError } from './lib/errorStore';
@@ -42,10 +43,12 @@ if (!rootElement) {
         <ErrorBoundary>
           <SettingsProvider>
             <BrowserRouter>
-              <AuthProvider>
-                <App />
-                <GlobalErrorModal />
-              </AuthProvider>
+          <AuthProvider>
+            <TransitionProvider>
+              <App />
+              <GlobalErrorModal />
+            </TransitionProvider>
+          </AuthProvider>
             </BrowserRouter>
           </SettingsProvider>
         </ErrorBoundary>

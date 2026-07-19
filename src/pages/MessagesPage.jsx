@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
+import Loading from '../components/Loading';
 import { MessageSquare, Send, Trash2, PenSquare } from 'lucide-react';
 
 export default function MessagesPage() {
@@ -57,11 +58,7 @@ export default function MessagesPage() {
     );
   }
 
-  if (loading) {
-    return <div className="max-w-3xl mx-auto animate-pulse space-y-3">
-      {[0, 1, 2].map((i) => <div key={i} className="h-16 bg-gray-200 rounded-lg" />)}
-    </div>;
-  }
+  if (loading) return <Loading />;
 
   return (
     <div className="max-w-3xl mx-auto">

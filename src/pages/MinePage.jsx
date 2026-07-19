@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTransition } from '../context/TransitionContext';
 import { isAndroid } from '../lib/platform';
 import {
   Shield, IdCard, Settings as SettingsIcon, ScrollText, User as UserIcon,
@@ -10,6 +11,7 @@ import { MenuList, MenuRow, MenuDivider, MenuSectionTitle } from '../components/
 
 export default function MinePage() {
   const { user, logout } = useAuth();
+  const { launch } = useTransition();
   const navigate = useNavigate();
   const android = isAndroid();
 
@@ -57,30 +59,30 @@ export default function MinePage() {
 
       <MenuSectionTitle>账号</MenuSectionTitle>
       <MenuList className="mb-2 animate-fadeInUp">
-        <MenuRow icon={Shield} label="账号安全" desc="密码 · 2FA · 注销账号" onClick={() => navigate('/account/security')} />
+        <MenuRow icon={Shield} label="账号安全" desc="密码 · 2FA · 注销账号" onClick={(e) => launch(e, '/account/security')} />
         <MenuDivider />
-        <MenuRow icon={IdCard} label="账号信息" desc="昵称 · 简介 · 头像" onClick={() => navigate('/account/info')} />
+        <MenuRow icon={IdCard} label="账号信息" desc="昵称 · 简介 · 头像" onClick={(e) => launch(e, '/account/info')} />
       </MenuList>
 
       <MenuSectionTitle>通用</MenuSectionTitle>
       <MenuList className="mb-2 animate-fadeInUp">
-        <MenuRow icon={Bell} label="消息通知" desc="系统消息与互动提醒" onClick={() => navigate('/notifications')} />
+        <MenuRow icon={Bell} label="消息通知" desc="系统消息与互动提醒" onClick={(e) => launch(e, '/notifications')} />
         <MenuDivider />
-        <MenuRow icon={SettingsIcon} label="设置" desc="个性化 · 更新 · 反馈 · 关于" onClick={() => navigate('/settings')} />
+        <MenuRow icon={SettingsIcon} label="设置" desc="个性化 · 更新 · 反馈 · 关于" onClick={(e) => launch(e, '/settings')} />
         <MenuDivider />
-        <MenuRow icon={ScrollText} label="隐私条款和用户协议" onClick={() => navigate('/privacy')} />
+        <MenuRow icon={ScrollText} label="隐私条款和用户协议" onClick={(e) => launch(e, '/privacy')} />
       </MenuList>
 
       {user?.role === 'admin' && (
         <MenuList className="mb-2 animate-fadeInUp">
-          <MenuRow icon={ShieldCheck} label="管理后台" onClick={() => navigate('/admin')} />
+          <MenuRow icon={ShieldCheck} label="管理后台" onClick={(e) => launch(e, '/admin')} />
         </MenuList>
       )}
 
       <MenuList className="mb-5 animate-fadeInUp">
-        <MenuRow icon={UserIcon} label="我的主页" onClick={() => navigate(`/user/${user.id}`)} />
+        <MenuRow icon={UserIcon} label="我的主页" onClick={(e) => launch(e, `/user/${user.id}`)} />
         <MenuDivider />
-        <MenuRow icon={FileText} label="我的文章" onClick={() => navigate(`/user/${user.id}?tab=articles`)} />
+        <MenuRow icon={FileText} label="我的文章" onClick={(e) => launch(e, `/user/${user.id}?tab=articles`)} />
       </MenuList>
 
       <button

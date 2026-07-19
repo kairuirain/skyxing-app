@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../lib/api';
+import Loading from '../components/Loading';
 import { Calendar, Eye, Tag, User } from 'lucide-react';
 
 // “播客”即文章栏目：连接后端 /articles 展示文章列表
@@ -62,14 +63,7 @@ export default function PodcastPage() {
         </div>
 
         {loading ? (
-          <div className="space-y-2.5">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-[var(--win-card)] border border-[var(--win-border)] rounded-lg p-4 animate-pulse">
-                <div className="h-4 bg-[var(--win-pane-hover)] rounded w-2/3 mb-2" />
-                <div className="h-3 bg-[var(--win-pane-hover)] rounded w-full" />
-              </div>
-            ))}
-          </div>
+          <Loading />
         ) : articles.length === 0 ? (
           <div className="text-center py-16 text-[var(--win-text-tertiary)]">
             <p className="text-[14px]">暂无内容</p>

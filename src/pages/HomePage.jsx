@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import api from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import { useTransition } from '../context/TransitionContext';
+import Loading from '../components/Loading';
 import useSync from '../hooks/useSync';
 import { isAndroid } from '../lib/platform';
 import {
@@ -11,7 +13,7 @@ import {
 
 export default function HomePage() {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const { launch } = useTransition();
   const android = isAndroid();
   const [articles, setArticles] = useState([]);
   const [pagination, setPagination] = useState(null);
@@ -91,7 +93,7 @@ export default function HomePage() {
           <div className="flex flex-wrap gap-2.5 mt-4">
             {user ? (
               <>
-                <button onClick={() => navigate('/write')} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-[#fb7299] to-[#00a1d6] text-white shadow-sm hover:shadow-md hover:opacity-90 transition-all">
+                <button onClick={(e) => launch(e, '/write')} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-[#fb7299] to-[#00a1d6] text-white shadow-sm hover:shadow-md hover:opacity-90 transition-all">
                   <PenSquare size={15} /> 写文章
                 </button>
                 <Link to="/messages" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 shadow-sm transition-all">
@@ -148,20 +150,13 @@ export default function HomePage() {
         </div>
 
         {loading ? (
-          <div className="space-y-2.5">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-[var(--win-card)] border border-[var(--win-border)] rounded-lg p-4 animate-pulse">
-                <div className="h-4 bg-[var(--win-pane-hover)] rounded w-2/3 mb-2" />
-                <div className="h-3 bg-[var(--win-pane-hover)] rounded w-full" />
-              </div>
-            ))}
-          </div>
+          <Loading />
         ) : articles.length === 0 ? (
           <div className="text-center py-16 text-[var(--win-text-tertiary)]">
             <Sparkles size={32} className="mx-auto mb-3 text-gray-300" />
             <p className="text-[14px]">还没有文章</p>
             {user && (
-              <button onClick={() => navigate('/write')} className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium bg-[var(--win-accent)] text-white hover:opacity-90 transition-opacity">
+              <button onClick={(e) => launch(e, '/write')} className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium bg-[var(--win-accent)] text-white hover:opacity-90 transition-opacity">
                 <PenSquare size={15} /> 写第一篇
               </button>
             )}
@@ -220,7 +215,7 @@ export default function HomePage() {
 
       {/* 写文章 FAB：安卓端底部 nav 遮挡，使用 bottom-20；桌面端 bottom-6 */}
       {user && (
-        <button onClick={() => navigate('/write')}
+        <button onClick={(e) => launch(e, '/write')}
           className={'fixed right-6 w-14 h-14 rounded-full bg-gradient-to-br from-[#fb7299] to-[#00a1d6] text-white shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center z-50 ' +
             (android ? 'bottom-20' : 'bottom-6')}
           title="写文章">

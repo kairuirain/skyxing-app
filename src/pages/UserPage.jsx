@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
+import Loading from '../components/Loading';
 import { Calendar, Edit3, FileText } from 'lucide-react';
 
 export default function UserPage() {
@@ -35,7 +36,7 @@ export default function UserPage() {
 
   const formatDate = (d) => new Date(d).toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric' });
 
-  if (loading) return <div className="max-w-2xl mx-auto animate-pulse flex gap-4"><div className="w-16 h-16 bg-gray-200 rounded-full"/><div className="space-y-2"><div className="h-5 bg-gray-200 rounded w-24"/><div className="h-4 bg-gray-200 rounded w-40"/></div></div>;
+  if (loading) return <Loading />;
   if (!profile) return <div className="text-center py-12"><p className="text-gray-500">用户不存在</p><Link to="/" className="btn-primary mt-3 inline-block">返回首页</Link></div>;
 
   return (

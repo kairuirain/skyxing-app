@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
+import Loading from '../components/Loading';
 import { Users, FileText, MessageSquare, Eye, Trash2, ArrowUp, ArrowDown, GripVertical } from 'lucide-react';
 
 export default function AdminPage() {
@@ -59,7 +60,7 @@ export default function AdminPage() {
     </th>
   );
 
-  if (loading) return <div className="animate-pulse space-y-3"><div className="h-6 bg-gray-200 rounded w-1/4"/><div className="grid grid-cols-2 gap-3">{[1,2,3,4].map(i=><div key={i} className="h-20 bg-gray-200 rounded"/>)}</div></div>;
+  if (loading) return <Loading />;
 
   const roleColor = r => ({ user:'bg-gray-100 text-gray-700', author:'bg-blue-100 text-blue-700', admin:'bg-purple-100 text-purple-700' })[r]||'';
 

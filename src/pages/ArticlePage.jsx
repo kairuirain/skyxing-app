@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
+import Loading from '../components/Loading';
 import { Calendar, Eye, Tag, User, Send, Trash2, Edit3, Pin, PinOff } from 'lucide-react';
 import { prepareArticleContent } from '../lib/markdown.js';
 
@@ -86,7 +87,7 @@ export default function ArticlePage() {
 
   const formatDate = (d) => new Date(d).toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
 
-  if (loading) return <div className="max-w-3xl mx-auto animate-pulse space-y-3"><div className="h-7 bg-gray-200 rounded w-3/4"/><div className="h-4 bg-gray-200 rounded w-1/2"/><div className="h-4 bg-gray-200 rounded w-full"/></div>;
+  if (loading) return <Loading />;
   if (!article) return <div className="text-center py-12"><p className="text-gray-500">文章不存在</p><Link to="/" className="btn-primary mt-3 inline-block">返回首页</Link></div>;
 
   const isOwner = user && (user.id === article.authorId || user.role === 'admin');
